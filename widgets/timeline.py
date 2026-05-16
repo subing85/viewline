@@ -19,6 +19,11 @@ class TimelineWidget(QtWidgets.QWidget):
         self.end_frame = 100
         self.current_frame = 1
 
+        # self.start_frame = constants.START_FRAME
+        # self.end_frame = constants.START_FRAME + constants.DEFAULT_FRAMES
+        # self.current_frame = constants.START_FRAME
+
+
         self.cached_frames = set()
 
         self.setMouseTracking(True)
@@ -28,7 +33,7 @@ class TimelineWidget(QtWidgets.QWidget):
         self.end_frame = end
         self.update()
 
-    def set_frame(self, frame):
+    def set_current_frame(self, frame):
         self.current_frame = frame + self.start_frame
         self.update()
 

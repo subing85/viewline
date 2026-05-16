@@ -146,8 +146,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.loopButton.toggled.connect(self.player.set_loop)
 
-        self.player.frame_ready.connect(self.viewer.set_current_frame)
-        self.player.frame_changed.connect(self.timeline.set_frame)
+        self.player.frame_ready.connect(self.viewer.set_frame)
+        self.player.frame_changed.connect(self.timeline.set_current_frame)
+        self.player.frame_changed.connect(self.viewer.set_current_frame)
         self.player.cache_changed.connect(self.timeline.set_cached_frames)
 
         # self.player.frame_changed.connect(self.viewer.set_current_frame)

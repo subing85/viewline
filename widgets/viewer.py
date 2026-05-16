@@ -22,6 +22,7 @@ class ViewerWidget(QtOpenGLWidgets.QOpenGLWidget):
         self.setSizePolicy(sizePolicy)
 
         self.frame = None
+        self.current_frame = None
 
         self.overlay_options = {
             "top_left": {},
@@ -34,10 +35,12 @@ class ViewerWidget(QtOpenGLWidgets.QOpenGLWidget):
 
         self.overlay_pixmaps = {}
 
-
     def set_frame(self, frame):
         self.frame = frame
         self.update()
+
+    def set_current_frame(self, frame):
+        self.current_frame = frame + 1
 
     def initializeGL(self):
         GL.glClearColor(0.1, 0.1, 0.1, 1.0)
@@ -338,7 +341,6 @@ class ViewerWidget(QtOpenGLWidgets.QOpenGLWidget):
 
         return path
 
-
     def get_overlay_text(self, key):
         values = {
             "project": "Project: Demo",
@@ -347,17 +349,11 @@ class ViewerWidget(QtOpenGLWidgets.QOpenGLWidget):
             "version": "Version: v001",
             "date": f"Date: {QtCore.QDate.currentDate().toString()}",
             "artist": "Artist: Batman Hero",
-            "frame": f"Frame: 10001",
+            "frame": f"Frame: {str(self.current_frame).zfill(constants.FRAME_PADDING)}",
             "copyright": "Support, Subin. Gopi (subing85@gmail.com).",
         }
 
         return values.get(key, key)
-
-
-    def set_current_frame(self, frame):
-        self.current_frame = frame + 1
-
-        self.update()
 
 
 if __name__ == "__main__":
