@@ -1,24 +1,28 @@
-class FrameCache1(object):
+class FrameCache(object):
 
     def __init__(self, max_size=100):
-
         self.max_size = max_size
-
-        self.chunks = {}
+        self.cache = dict()
 
     def get(self, frame):
-
-        return self.chunks.get(frame)
+        return self.cache.get(frame)
 
     def add(self, frame, image):
-        if len(self.chunks) >= self.max_size:
-            first_key = next(iter(self.chunks))
-            del self.chunks[first_key]
+        if len(self.cache) >= self.max_size:
+            first_key = next(iter(self.cache))
+            del self.cache[first_key]
 
-        self.chunks[frame] = image
+        self.cache[frame] = image
 
     def clear(self):
-        self.chunks.clear()
+        self.cache.clear()
+
+    def has_frame(self, frame):
+        return frame in self.cache
+
+    def cached_frames(self):
+        return sorted(self.cache.keys())
+
 
 
 if __name__ == "__main__":

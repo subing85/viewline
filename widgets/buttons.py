@@ -1,7 +1,9 @@
+from PySide6 import QtGui
 from PySide6 import QtCore
 from PySide6 import QtWidgets
 
 
+from widgets.menus import DisplayMenus
 from widgets.pixmaps import NamePixmapIcon
 
 
@@ -15,7 +17,9 @@ class IconButton(QtWidgets.QPushButton):
         self.height = kwargs.get("height", 22)
         self.locked = False if kwargs.get("locked") == False else True
 
-        self.setToolTip(kwargs.get("tooltip", "unknown"))
+        if kwargs.get("tooltip"):
+            self.setToolTip(kwargs["tooltip"])
+
         self.setFlat(True)
 
         icon = NamePixmapIcon(self.name)
@@ -53,16 +57,20 @@ class HelpButton(IconButton):
     name = "help"
 
 
-class LoopButton(QtWidgets.QToolButton):
-    name = "loop"
+class ToolButton(QtWidgets.QToolButton):
+
+    name = "tool"
 
     def __init__(self, parent, **kwargs):
-        super(LoopButton, self).__init__(parent)
+        super(ToolButton, self).__init__(parent)
 
-        self.width = kwargs.get("width", 42)
+        self.width = kwargs.get("width", 32)
         self.height = kwargs.get("height", 32)
 
-        self.setToolTip("Loop the timeline")
+        if kwargs.get("tooltip"):
+            self.setToolTip(kwargs["tooltip"])
+
+        self.setToolTip(kwargs.get("tooltip", "unknown"))
 
         icon = NamePixmapIcon(self.name)
         self.setIcon(icon)
@@ -71,11 +79,37 @@ class LoopButton(QtWidgets.QToolButton):
         self.setMinimumSize(QtCore.QSize(self.width, self.height))
         self.setMaximumSize(QtCore.QSize(self.width, self.height))
 
+
+class LoopButton(ToolButton):
+    name = "loop"
+
+    def __init__(self, parent, **kwargs):
+        super(LoopButton, self).__init__(parent, **kwargs)
+
         self.setCheckable(True)
         self.setChecked(False)
 
 
-class TextButton(QtWidgets.QToolButton):
+class DisplayMenuButton(ToolButton):
+    name = "display"
+
+    def __init__(self, parent, **kwargs):
+        super(DisplayMenuButton, self).__init__(parent, **kwargs)
+
+        self.menu = DisplayMenus(self)
+
+        self.clicked.connect(self.contextMenu)
+
+    def contextMenu(self):
+        self.menu.exec(QtGui.QCursor.pos())
+
+    def values(self):
+        from pprint import pprint
+        pprint(self.menu.values)
+
+
+
+class _TextButton(QtWidgets.QToolButton):
 
     def __init__(self, parent, *args, **kwargs):
         super(TextButton, self).__init__(parent)
@@ -84,6 +118,7 @@ class TextButton(QtWidgets.QToolButton):
 
         if kwargs.get("tooltip"):
             self.setToolTip(kwargs["tooltip"])
+
 
 
 if __name__ == "__main__":

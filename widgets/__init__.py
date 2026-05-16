@@ -24,6 +24,7 @@ from widgets.buttons import LoopButton
 from widgets.buttons import ForwardButton
 from widgets.buttons import BackwordButton
 from widgets.buttons import PlayPauseButton
+from widgets.buttons import DisplayMenuButton
 
 from widgets.comboboxs import FbsCombobox
 from widgets.comboboxs import AovsCombobox
@@ -85,6 +86,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.horizontalspacer1 = HorizontalSpacer()
         self.horizontallayout_panel.addItem(self.horizontalspacer1)
 
+        self.displayMenuButton = DisplayMenuButton(self, tooltip="Water mark display menu", width=32, height=32)
+        self.horizontallayout_panel.addWidget(self.displayMenuButton)
+
         self.helpButton = HelpButton(self, tooltip="Help and Support", width=32, height=32)
         self.horizontallayout_panel.addWidget(self.helpButton)
 
@@ -116,7 +120,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.horizontalspacer3 = HorizontalSpacer()
         self.horizontallayout_controller.addItem(self.horizontalspacer3)
 
-        self.loopButton = LoopButton(self, width=42, height=32)
+        self.loopButton = LoopButton(self, tooltip="Loop the timeline", width=42, height=32)
 
         self.horizontallayout_controller.addWidget(self.loopButton)
 
@@ -144,6 +148,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.player.frame_ready.connect(self.viewer.set_frame)
         self.player.frame_changed.connect(self.timeline.set_frame)
+        self.player.cache_changed.connect(self.timeline.set_cached_frames)
 
         # self.timeline.frame_changed.connect(self.player.seek)
         self.timeline.frame_changed.connect(self.seek)
@@ -185,6 +190,8 @@ class MainWindow(QtWidgets.QMainWindow):
         if not filepath:
             return
 
+        # filepath = "/alpha/works/C2C/samples/footage/shot-1001-1/shot-1001.####.png"
+
         LOGGER.info(f"Source filepath, {filepath}")
 
         self.player.load(filepath)
@@ -209,7 +216,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def toggle_play_pause(self):
         self.player.toggle_play_pause()
-        # self.playPauseButton.switch(self.player.is_playing)
+        self.playPauseButton.switch(self.player.is_playing)
         self.reset_video_fps()
 
     def seek(self):

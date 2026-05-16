@@ -17,28 +17,27 @@ class TimelineWidget(QtWidgets.QWidget):
 
         self.start_frame = 1
         self.end_frame = 100
-
         self.current_frame = 1
+
+        self.cached_frames = set()
 
         self.setMouseTracking(True)
 
     def set_range(self, start, end):
-
         self.start_frame = start
         self.end_frame = end
-
         self.update()
 
     def set_frame(self, frame):
-
         self.current_frame = frame + self.start_frame
+        self.update()
 
+    def set_cached_frames(self, frames):
+        self.cached_frames = set(frames)
         self.update()
 
     def paintEvent(self, event):
-
         painter = QtGui.QPainter(self)
-
         painter.fillRect(self.rect(), QtGui.QColor(40, 40, 40))
 
         width = self.width()
@@ -49,19 +48,11 @@ class TimelineWidget(QtWidgets.QWidget):
         if total_frames <= 0:
             return
 
-        # pixels_per_frame = width / total_frames
-
         usable_width = width - (self.timeline_margin * 2)
         pixels_per_frame = usable_width / (total_frames - 1)
 
-        # --------------------------------------------------
         # Draw frame ticks
-        # --------------------------------------------------
-
         for frame in range(self.start_frame, self.end_frame + 1):
-
-            # x = int((frame - self.start_frame) * pixels_per_frame)
-
             x = int(self.timeline_margin + ((frame - self.start_frame) * pixels_per_frame))
 
             # Major tick every 10 frames
@@ -72,62 +63,26 @@ class TimelineWidget(QtWidgets.QWidget):
             else:
                 painter.setPen(QtGui.QColor(100, 100, 100))
                 painter.drawLine(x, 10, x, 20)
-        """
-        # --------------------------------------------------
+
         # Draw current frame indicator
-        # --------------------------------------------------
-
-        current_x = int(
-            (self.current_frame - self.start_frame)
-            * pixels_per_frame
-        )
-
-        painter.setPen(
-            QtGui.QPen(
-                QtGui.QColor(255, 80, 80),
-                2
-            )
-        )
-
-        painter.drawLine(
-            current_x,
-            0,
-            current_x,
-            height
-        )
-        """
-
-        # --------------------------------------------------
-        # Draw current frame indicator
-        # --------------------------------------------------
-
-        # current_x = int((self.current_frame - self.start_frame) * pixels_per_frame)
-
         current_x = int(
             self.timeline_margin + ((self.current_frame - self.start_frame) * pixels_per_frame)
         )
 
         # Playhead line
         painter.setPen(QtGui.QPen(QtGui.QColor(255, 80, 80), 2))
-
         painter.drawLine(current_x, 0, current_x, height)
 
-        # --------------------------------------------------
         # Draw current frame label
-        # --------------------------------------------------
-
         frame_text = str(self.current_frame)
 
         font_metrics = painter.fontMetrics()
-
         text_width = font_metrics.horizontalAdvance(frame_text)
-
         text_height = font_metrics.height()
 
         padding = 4
 
         text_x = current_x - int(text_width / 2)
-
         text_y = height - 10
 
         # Background box
@@ -140,8 +95,73 @@ class TimelineWidget(QtWidgets.QWidget):
 
         # Text
         painter.setPen(QtGui.QColor(20, 20, 20))
-
         painter.drawText(rect, QtCore.Qt.AlignCenter, frame_text)
+
+        # Draw Cache Dot Bar
+        # cache_y = height - 10
+        # cache_y = 10
+        # for frame in self.cached_frames:
+        #     x = self.frame_to_pos(frame)
+        #     painter.fillRect(int(x), cache_y, 3, 6, QtGui.QColor(255, 170, 0))
+
+        # Draw Cache Line Bar
+
+        ranges = self.build_ranges(self.cached_frames)
+        cache_y = 0  # - 10
+
+        # print("\n", ranges)
+
+        for start, end in ranges:
+            x1 = self.frame_to_pos(start)
+            x2 = self.frame_to_pos(end)
+            painter.fillRect(int(x1), cache_y, int(x2 - x1) + 4, 6, QtGui.QColor(255, 170, 0))
+
+
+    def build_ranges(self, frames):
+        if not frames:
+            return []
+
+        frames = sorted(frames)
+
+        ranges = []
+        start = frames[0] + 1
+        end = frames[0]
+
+        for frame in frames:
+            end = frame+1
+
+        ranges.append((start, end))
+
+        return ranges
+
+
+    def build_ranges1(self, frames):
+        if not frames:
+            return []
+        frames = sorted(frames)
+        ranges = []
+        start = frames[0]
+        end = frames[0]
+
+        for frame in frames[1:]:
+            # contiguous
+            if frame == end + 1:
+                end = frame
+            else:
+                ranges.append((start, end))
+                start = frame
+                end = frame
+
+        ranges.append((start, end))
+
+        return ranges
+
+    def frame_to_pos(self, frame):
+        total_frames = self.end_frame - self.start_frame
+        usable_width = self.width() - (self.timeline_margin * 2)
+        ratio = (frame - self.start_frame) / total_frames
+
+        return self.timeline_margin + (ratio * usable_width)
 
     def mousePressEvent(self, event):
         self.update_frame_from_mouse(event.pos().x())
