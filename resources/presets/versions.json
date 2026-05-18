@@ -25,7 +25,8 @@
             "id": 34,
             "name": "workspace 0.0.1",
             "type": "ApiUser"
-        }
+        },
+        "image": "https://github.com/subing85/review_player/blob/main/resources/icons/sample-01.png?raw=true"
     },
     {
         "type": "Version",
@@ -53,7 +54,8 @@
             "id": 34,
             "name": "workspace 0.0.1",
             "type": "ApiUser"
-        }
+        },
+        "image": "https://github.com/subing85/review_player/blob/main/resources/icons/sample-02.png?raw=true"
     },
     {
         "type": "Version",
@@ -81,7 +83,8 @@
             "id": 34,
             "name": "workspace 0.0.1",
             "type": "ApiUser"
-        }
+        },
+        "image": "https://github.com/subing85/review_player/blob/main/resources/icons/sample-03.png?raw=true"
     },
     {
         "type": "Version",
@@ -109,7 +112,8 @@
             "id": 34,
             "name": "workspace 0.0.1",
             "type": "ApiUser"
-        }
+        },
+        "image": "https://github.com/subing85/review_player/blob/main/resources/icons/sample-04.png?raw=true"
     },
     {
         "type": "Version",
@@ -137,7 +141,8 @@
             "id": 34,
             "name": "workspace 0.0.1",
             "type": "ApiUser"
-        }
+        },
+        "image": "https://github.com/subing85/review_player/blob/main/resources/icons/sample-05.png?raw=true"
     },
     {
         "type": "Version",
@@ -165,7 +170,9 @@
             "id": 34,
             "name": "workspace 0.0.1",
             "type": "ApiUser"
-        }
+        },
+        "image": "https://github.com/subing85/review_player/blob/main/resources/icons/sample-06.png?raw=true",
+        "media": "/alpha/works/C2C/samples/footage/shot-1001-1/shot-1001.####.png"
     },
     {
         "type": "Version",
@@ -193,7 +200,9 @@
             "id": 34,
             "name": "workspace 0.0.1",
             "type": "ApiUser"
-        }
+        },
+        "image": "https://github.com/subing85/review_player/blob/main/resources/icons/sample-07.png?raw=true",
+        "media": "/alpha/works/C2C/samples/footage/shot-1002/shot-1002.####.exr"
     },
     {
         "type": "Version",
@@ -221,7 +230,9 @@
             "id": 34,
             "name": "workspace 0.0.1",
             "type": "ApiUser"
-        }
+        },
+        "image": "https://github.com/subing85/review_player/blob/main/resources/icons/sample-08.png?raw=true",
+        "media": "/alpha/works/C2C/samples/footage/shot-1004/shot-1004.####.exr"
     },
     {
         "type": "Version",
@@ -249,7 +260,9 @@
             "id": 34,
             "name": "workspace 0.0.1",
             "type": "ApiUser"
-        }
+        },
+        "image": "https://github.com/subing85/review_player/blob/main/resources/icons/sample-09.png?raw=true",
+        "media": "/alpha/works/C2C/samples/footage/shot-1005/shot-1005.####.exr"
     },
     {
         "type": "Version",
@@ -277,7 +290,9 @@
             "id": 34,
             "name": "workspace 0.0.1",
             "type": "ApiUser"
-        }
+        },
+        "image": "https://github.com/subing85/review_player/blob/main/resources/icons/sample-01.png?raw=true",
+        "media": "/alpha/works/C2C/samples/footage/shot-1006/shot-1006.####.exr"
     },
     {
         "type": "Version",

@@ -12,7 +12,6 @@ import requests
 import webbrowser
 
 
-
 def hasPathExists(filepath):
     if not filepath:
         return None
@@ -22,7 +21,6 @@ def hasPathExists(filepath):
 
 def openUrl(path):
     webbrowser.open(path)
-
 
 
 def isUrl(path):

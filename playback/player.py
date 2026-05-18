@@ -42,8 +42,8 @@ class MediaPlayer(QtCore.QObject):
         # self.start_frame = 1
         # self.current_frame = 1
 
-        self.start_frame = constants.START_FRAME
-        self.current_frame = constants.START_FRAME
+        self.start_frame = constants.START_FRAME or 101
+        self.current_frame = constants.START_FRAME or 101
         self.frame_count = 0
 
         self.loop_enabled = False
@@ -86,11 +86,12 @@ class MediaPlayer(QtCore.QObject):
         # Advance
         self.current_frame += 1
 
+        # End
         if self.current_frame >= self.end_frame:
             if self.loop_enabled:
                 self.current_frame = self.start_frame
             else:
-                self.current_frame = self.start_frame
+                self.current_frame = self.end_frame
                 self.stop()
 
     def update_frame(self):
@@ -105,6 +106,8 @@ class MediaPlayer(QtCore.QObject):
         self.frame_ready.emit(frame)
         self.frame_changed.emit(self.current_frame)
 
+        self.displayed_frame = self.current_frame
+
     def toggle_play_pause(self):
         if self.is_playing:
             self.stop()
@@ -115,8 +118,8 @@ class MediaPlayer(QtCore.QObject):
         if not self.reader:
             return
 
-        if self.current_frame >= self.end_frame:
-            self.current_frame = self.start_frame
+        # if self.current_frame >= self.end_frame:
+        #     self.current_frame = self.start_frame
 
         fps = self.reader.get_fps()
 
@@ -130,10 +133,13 @@ class MediaPlayer(QtCore.QObject):
 
     def stop(self):
         self.timer.stop()
+
         self.is_playing = False
 
         if self.playbutton:
             self.playbutton.switch(False)
+
+        self.current_frame = self.displayed_frame
 
     def set_loop(self, enabled):
         self.loop_enabled = enabled
@@ -152,6 +158,8 @@ class MediaPlayer(QtCore.QObject):
         LOGGER.info(f'Current FPS, has been changed into, "{fps}-FPS"')
 
     def set_aov(self, aov):
+        if not aov:
+            return
         self.current_aov = aov
         self.cache.clear()
         self.cache_changed.emit([])
@@ -167,8 +175,8 @@ class MediaPlayer(QtCore.QObject):
 
         self.current_frame -= 1
 
-        if self.current_frame < 1:
-            self.current_frame = self.frame_count
+        if self.current_frame <= self.start_frame:
+            self.current_frame = constants.START_FRAME + (self.frame_count - 1)
 
         self.update_frame()
 
@@ -178,8 +186,8 @@ class MediaPlayer(QtCore.QObject):
 
         self.current_frame += 1
 
-        if self.current_frame > self.frame_count:
-            self.current_frame = 1
+        if self.current_frame >= constants.START_FRAME + self.frame_count:
+            self.current_frame = self.start_frame
 
         self.update_frame()
 

@@ -4,11 +4,15 @@
 # WARNING! All changes made in this file will be lost when recompiling source file!
 
 
+import utils
+
 from PySide6 import QtCore
 from PySide6 import QtWidgets
 
 from widgets.pixmaps import UrlPixmap
 from widgets.pixmaps import PathPixmap
+from widgets.pixmaps import NamePixmap
+from widgets.pixmaps import PixmapIcon
 
 
 class PlaylistWidgetItem(QtWidgets.QTreeWidgetItem):
@@ -16,6 +20,8 @@ class PlaylistWidgetItem(QtWidgets.QTreeWidgetItem):
         super(PlaylistWidgetItem, self).__init__(parent)
 
         self.context = args[0]
+
+        self.size = kwargs.get("size", (128, 72))
 
         self.setFlags(
             QtCore.Qt.ItemIsSelectable
@@ -30,24 +36,36 @@ class PlaylistWidgetItem(QtWidgets.QTreeWidgetItem):
     def setValue(self, context=None):
         self.context = context or self.context
 
-        self.setText(0, self.context["code"])
-        self.setIndexIcon("source", index=0)
+        values = [
+            f"\nVersion: {self.context['code']} | {self.context['id']}",
+            f"Task: {self.context['sg_task']['name']}",
+            f"Entity: {self.context['entity']['name']}",
+            f"Status: {self.context['sg_status_list']}",
+            f"created: {self.context['created_at']}",
+            f"created By: {self.context['created_by']['name']}\n",
+        ]
 
+        self.setText(0, "\n".join(values))
+        self.setIndexIcon(self.context.get("image"), index=0)
 
     def setFonts(self, index, fontSize=None, bold=False):
         fontSize = fontSize or constants.FONT_SIZE
         font = Font(fontSize, family=constants.FONT_FAMILY, bold=bold)
         self.setFont(index, font)
 
-    def setIndexIcon(self, name, index=0):
-        pixmap = UrlPixmap(filepath) if utils.isUrl(filepath) else PathPixmap(filepath)
+    def setIndexIcon(self, filepath, index=0):
+        if filepath:
+            pixmap = UrlPixmap(filepath) if utils.isUrl(filepath) else PathPixmap(filepath)
+        else:
+            pixmap = NamePixmap("unknown")
 
         if not pixmap.isNull():
-            pixmap = pixmap.scaled(*self.size, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
+            pixmap = pixmap.scaled(
+                *self.size, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation
+            )
 
-        self.setPixmap(pixmap)
-        self.setScaledContents(False)
-
+        icon = PixmapIcon(pixmap)
+        self.setIcon(index, icon)
 
     def setBackgroundColor(self, index, color):
         qcolor = color if isinstance(color, QtGui.QColor) else QtGui.QColor(*color)
@@ -58,7 +76,6 @@ class PlaylistWidgetItem(QtWidgets.QTreeWidgetItem):
         qcolor = color if isinstance(color, QtGui.QColor) else QtGui.QColor(*color)
         brush = ForegroundBrush(qcolor)
         self.setForeground(index, brush)
-
 
 
 if __name__ == "__main__":

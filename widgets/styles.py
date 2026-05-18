@@ -35,7 +35,9 @@ class Font(QtGui.QFont):
             "capitalize": QtGui.QFont.Capitalize,  # 4 This alters the text to be rendered with the first character of each word as an uppercase character.
         }
 
-        self.setPointSizeF(sizes or kwargs.get("size", 10))
+        self.setPointSize(sizes or kwargs.get("size", 10))
+        self.setPixelSize(sizes or kwargs.get("size", 10))
+
         self.setFamily(kwargs.get("family", "Arial"))
         self.setBold(kwargs.get("bold", False))
         self.setItalic(kwargs.get("italic", False))

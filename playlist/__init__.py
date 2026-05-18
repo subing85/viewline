@@ -1,5 +1,5 @@
-
 import resources
+
 
 class Projects(object):
     """Project data provider."""
@@ -15,7 +15,6 @@ class Projects(object):
         """
 
         result = resources.getPreset("projects")
-
 
         return result
 

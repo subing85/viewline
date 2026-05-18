@@ -43,7 +43,6 @@ class ProjectIconLabel(QtWidgets.QLabel):
         self.setMinimumSize(QtCore.QSize(128, 72))
         self.setMaximumSize(QtCore.QSize(128, 72))
 
-
         sizepolicy = QtWidgets.QSizePolicy(
             QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Preferred
         )
@@ -53,10 +52,13 @@ class ProjectIconLabel(QtWidgets.QLabel):
         pixmap = UrlPixmap(filepath) if utils.isUrl(filepath) else PathPixmap(filepath)
 
         if not pixmap.isNull():
-            pixmap = pixmap.scaled(*self.size, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
+            pixmap = pixmap.scaled(
+                *self.size, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation
+            )
 
         self.setPixmap(pixmap)
         self.setScaledContents(False)
+
 
 if __name__ == "__main__":
     pass

@@ -5,6 +5,7 @@
 
 from __future__ import absolute_import
 
+import resources
 import constants
 
 from PySide6 import QtGui
@@ -24,11 +25,11 @@ class DisplayMenus(QtWidgets.QMenu):
         self.setTitle("Display")
         self.setTearOffEnabled(True)
 
-        self.displays = constants.WATER_MARKS_INPUTS
+        self.watermarks = resources.getPreset("watermarks")
 
         abcd = list()
 
-        for position, values in self.displays.items():
+        for position, values in self.watermarks.items():
             for context in values:
                 if not context.get("enable"):
                     continue

@@ -123,7 +123,32 @@ class TimelineWidget(QtWidgets.QWidget):
                 x2 = self.frame_to_pos(end)
                 painter.fillRect(int(x1), cache_y, int(x2 - x1) + 4, 6, QtGui.QColor(255, 170, 0))
 
+            # for start, end in ranges:
+            #    x1 = self.frame_to_pos(start)
+            #    x2 = self.frame_to_pos(end)
+            #    painter.fillRect(int(x1), cache_y, int(x2 - x1) + 4, 6, QtGui.QColor(255, 170, 0))
+
     def build_ranges(self, frames):
+        if not frames:
+            return []
+
+        frames, ranges = sorted(set(frames)), []
+        start, end = frames[0], frames[0]
+
+        for frame in frames[1:]:
+            # Contiguous
+            if frame == end + 1:
+                end = frame
+            # Break Range
+            else:
+                ranges.append((start, end))
+                start, end = frame, frame
+
+        # Final Range
+        ranges.append((start, end))
+        return ranges
+
+    def _build_ranges(self, frames):
         if not frames:
             return []
 

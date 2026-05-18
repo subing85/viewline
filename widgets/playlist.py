@@ -16,9 +16,11 @@ from widgets.labels import ProjectIconLabel
 from widgets.comboboxs import ProjectCombobox
 from widgets.treewidgets import PlaylistTreewidget
 
+
 class PlaylistGroup(QtWidgets.QWidget):
 
     project_changed = QtCore.Signal(dict)
+    click_widgetitem = QtCore.Signal(bool, dict)
 
     def __init__(self, parent, *args, **kwargs):
         super(PlaylistGroup, self).__init__(parent)
@@ -30,7 +32,9 @@ class PlaylistGroup(QtWidgets.QWidget):
         self.projectGroupbox = QtWidgets.QGroupBox(self)
         self.verticallayout.addWidget(self.projectGroupbox)
 
-        self.horizontallayout = HorizontalLayout(self.projectGroupbox, space=10, margins=(10, 10, 10, 10))
+        self.horizontallayout = HorizontalLayout(
+            self.projectGroupbox, space=10, margins=(10, 10, 10, 10)
+        )
 
         self.projectIconLabel = ProjectIconLabel(self)
         self.horizontallayout.addWidget(self.projectIconLabel)
@@ -46,6 +50,9 @@ class PlaylistGroup(QtWidgets.QWidget):
 
         self.set_project(self.projects[0])
 
+        self.playlistTreewidget.itemClicked.connect(self.open_media)
+        self.playlistTreewidget.itemDoubleClicked.connect(self.play_media)
+
     def set_project(self, context):
         self.projectIconLabel.setThumbnail(context["image"])
         self.project_changed.emit(context)
@@ -56,8 +63,11 @@ class PlaylistGroup(QtWidgets.QWidget):
     def set_versions(self, versions):
         self.playlistTreewidget.setValues(versions)
 
+    def open_media(self, widgetitem):
+        self.click_widgetitem.emit(False, widgetitem.context)
 
-
+    def play_media(self, widgetitem):
+        self.click_widgetitem.emit(True, widgetitem.context)
 
 
 if __name__ == "__main__":

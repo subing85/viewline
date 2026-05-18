@@ -26,4 +26,3 @@ def readJsonFile(filepath):
     with open(filepath, "r") as target:
         content = json.load(target)
         return content
-

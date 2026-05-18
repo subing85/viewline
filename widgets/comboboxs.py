@@ -12,6 +12,7 @@ from PySide6 import QtWidgets
 
 from widgets.styles import Font
 
+
 class ContextCombobox(QtWidgets.QComboBox):
     def __init__(self, parent, **kwargs):
         super(ContextCombobox, self).__init__(parent)
@@ -97,7 +98,9 @@ class AovsCombobox(QtWidgets.QComboBox):
 
         self.setMinimumSize(QtCore.QSize(150, 0))
 
-        sizepolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+        sizepolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred
+        )
         self.setSizePolicy(sizepolicy)
 
     def setAovs(self, aovs):
@@ -127,6 +130,7 @@ class ProjectCombobox(ContextCombobox):
 
     def indexChange(self, index):
         super().indexChange(index)
+
         self.project_changed.emit(self.context)
 
 

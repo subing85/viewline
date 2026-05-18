@@ -5,6 +5,7 @@
 
 import numpy
 
+import resources
 import constants
 
 from OpenGL import GL
@@ -47,13 +48,17 @@ class ViewerWidget(QtOpenGLWidgets.QOpenGLWidget):
         self.update()
 
     def set_current_frame(self, frame):
-        self.current_frame = frame + 1
+        self.current_frame = frame
 
     def initializeGL(self):
         GL.glClearColor(0.1, 0.1, 0.1, 1.0)
 
     def resizeGL(self, width, height):
         GL.glViewport(0, 0, width, height)
+
+    def clear(self):
+        self.frame = None
+        self.update()
 
     def paintGL(self):
         GL.glClear(GL.GL_COLOR_BUFFER_BIT)
@@ -132,12 +137,17 @@ class ViewerWidget(QtOpenGLWidgets.QOpenGLWidget):
 
     def draw_overlay(self):
         painter = QtGui.QPainter(self)
-        painter.setRenderHint(QtGui.QPainter.Antialiasing)
-        painter.setRenderHint(QtGui.QPainter.SmoothPixmapTransform)
+
+        painter.setRenderHint(QtGui.QPainter.Antialiasing, True)
+        painter.setRenderHint(QtGui.QPainter.TextAntialiasing, True)
+        # painter.setRenderHint(QtGui.QPainter.HighQualityAntialiasing, True)
+        painter.setRenderHint(QtGui.QPainter.SmoothPixmapTransform, True)
 
         rect = self.display_rect
 
-        for position in constants.WATER_MARKS_INPUTS:
+        watermark_inputs = resources.getPreset("watermarks")
+
+        for position in watermark_inputs:
             self.draw_overlay_position(painter, rect, position)
 
         painter.end()

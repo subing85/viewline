@@ -48,8 +48,6 @@ from widgets.timeline import TimelineWidget
 
 from playback.player import MediaPlayer
 
-
-
 LOGGER = logger.getLogger(__name__)
 
 
@@ -149,7 +147,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.verticallayout.addWidget(self.copyrightLabel)
 
         self.playlistGroup.project_changed.connect(self.set_playlist)
-        # self.playlistGroup.set_current_project(self.projects[0])
+        self.playlistGroup.click_widgetitem.connect(self.play_from_playlist)
 
         self.aovsCombobox.currentTextChanged.connect(self.player.set_aov)
 
@@ -161,7 +159,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.player.frame_changed.connect(self.timeline.set_current_frame)
         self.player.frame_changed.connect(self.viewer.set_current_frame)
         self.player.cache_changed.connect(self.timeline.set_cached_frames)
-
         self.timeline.frame_changed.connect(self.seek)
 
         self.backwordButton.clicked.connect(self.backword_frame)
@@ -170,7 +167,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.displayMenuButton.menu.overlay_changed.connect(self.viewer.set_overlay_option)
 
         self.helpButton.clicked.connect(self.help)
-
 
         # Create the shortcuts
         self.playShortcut = QtGui.QShortcut(QtGui.QKeySequence("Space"), self)
@@ -206,20 +202,37 @@ class MainWindow(QtWidgets.QMainWindow):
         versions = Versions.get(project)
         self.playlistGroup.set_versions(versions)
 
+    def play_from_playlist(self, play, context):
+        if not context.get("media"):
+            return
 
-    def openMedia(self):
-        print(self.splitter.sizes())
+        self.openMedia(filepath=context.get("media"))
 
-        dialog = OpenMediaDialog(self, browsepath=self.browsepath)
-        filepath = None
-        if dialog.exec():
-            filepath = dialog.getfile()
-            self.browsepath = os.path.dirname(filepath)
+        if play:
+            self.toggle_play_pause()
+
+    def openMedia(self, filepath=None):
+        """
+        if not filepath:
+            dialog = OpenMediaDialog(self, browsepath=self.browsepath)
+            if dialog.exec():
+                filepath = dialog.getfile()
+                self.browsepath = os.path.dirname(filepath)
+
+        self.viewer.clear()
+
+        if not filepath:
+            return
+        """
+
+        filepath = (
+            "/run/media/batman/ALPHA/works/C2C/samples/footage/shot-1001-1/shot-1001.####.png"
+        )
 
         LOGGER.info(f"Source filepath, {filepath}")
 
         self.player.load(filepath)
-        self.reset_video_fps()
+        # self.reset_video_fps()
 
         if self.player.reader.media_type == "sequence":
             self.aovsCombobox.setEnabled(True)
@@ -228,7 +241,6 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             self.aovsCombobox.clear()
             self.aovsCombobox.setEnabled(False)
-
         self.timeline.set_range(
             constants.START_FRAME, constants.START_FRAME + (self.player.frame_count - 1)
         )
@@ -278,6 +290,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.player.set_fps(fps)
 
     def help(self):
+        # print(self.splitter.sizes())
         LOGGER.info(f"Support, {constants.WEBLINK}")
         utils.openUrl(constants.WEBLINK)
 
