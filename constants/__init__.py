@@ -5,6 +5,8 @@
 
 from __future__ import absolute_import
 
+STUDIO_NAME = "motion-craft"
+
 RP_TOOL_NAME = "MC - Review Player"
 
 RP_TOOL_ICON = "mc-review-player"

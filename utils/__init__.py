@@ -11,6 +11,9 @@ import urllib
 import requests
 import webbrowser
 
+import resources
+import constants
+
 
 def hasPathExists(filepath):
     if not filepath:
@@ -51,6 +54,48 @@ def getUrlContent(url, encode=False):
     encoded = base64.b64encode(content).decode()
 
     return encoded
+
+
+def overrideWatermarkValues(version, watermarks=None, **kwargs):
+    """Override Watermark Values From Version"""
+
+    watermarks = watermarks or resources.getPreset("watermarks")
+
+    for position in watermarks:
+        for overlay in watermarks[position]:
+            if not overlay.get("enable"):
+                continue
+
+            code = overlay.get("code")
+            if not code:
+                continue
+
+            if code == "copyright":
+                overlay["value"] = constants.COPYRIGHT_LABEL
+                continue
+
+            if code == "studio-logo":
+                overlay["value"] = kwargs.get("studio_logo")
+                continue
+
+            if code == "project-logo":
+                overlay["value"] = kwargs.get("project_logo")
+                continue
+
+            value = version.get(code)
+
+            if value is None:
+                overlay["value"] = value
+                continue
+
+            # Entity Dictionary
+            if isinstance(value, dict):
+                value = value.get("name") or value.get("code") or ""
+
+            # Store Override Value
+            overlay["value"] = value
+
+    return watermarks
 
 
 if __name__ == "__main__":

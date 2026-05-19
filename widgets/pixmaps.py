@@ -42,7 +42,10 @@ class PathPixmap(QtGui.QPixmap):
     def __init__(self, filepath, **kwargs):
         super(PathPixmap, self).__init__()
 
-        self.load(filepath)
+        if utils.isUrl(filepath):
+            self.loadFromData(utils.getUrlContent(filepath))
+        else:
+            self.load(filepath)
 
 
 class UrlPixmap(QtGui.QPixmap):

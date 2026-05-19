@@ -27,7 +27,7 @@ class PlaylistGroup(QtWidgets.QWidget):
 
         self.projects = kwargs.get("projects")
 
-        self.verticallayout = VerticalLayout(self, space=10, margins=(0, 0, 0, 0))
+        self.verticallayout = VerticalLayout(self, space=5, margins=(0, 0, 0, 0))
 
         self.projectGroupbox = QtWidgets.QGroupBox(self)
         self.verticallayout.addWidget(self.projectGroupbox)
@@ -48,13 +48,15 @@ class PlaylistGroup(QtWidgets.QWidget):
         self.playlistTreewidget = PlaylistTreewidget(self)
         self.verticallayout.addWidget(self.playlistTreewidget)
 
-        self.set_project(self.projects[0])
+        if self.projects:
+            self.set_project(self.projects[0])
 
         self.playlistTreewidget.itemClicked.connect(self.open_media)
         self.playlistTreewidget.itemDoubleClicked.connect(self.play_media)
 
     def set_project(self, context):
         self.projectIconLabel.setThumbnail(context["image"])
+        context["value"] = self.projectIconLabel.pixmap()
         self.project_changed.emit(context)
 
     def set_current_project(self, project):
