@@ -20,7 +20,7 @@ class CopyrightLabel(QtWidgets.QLabel):
     def __init__(self, parent, **kwargs):
         super(CopyrightLabel, self).__init__(parent)
 
-        font = Font(constants.SMALL_FONT_SIZE, family=constants.FONT_FAMILY, bold=True)
+        font = Font(constants.AVERAGE_FONT_SIZE, family=constants.FONT_FAMILY, bold=True)
         self.setFont(font)
 
         self.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter)
@@ -49,14 +49,14 @@ class ProjectIconLabel(QtWidgets.QLabel):
         self.setSizePolicy(sizepolicy)
 
     def setThumbnail(self, filepath):
-        pixmap = UrlPixmap(filepath) if utils.isUrl(filepath) else PathPixmap(filepath)
+        pixmaps = UrlPixmap(filepath) if utils.isUrl(filepath) else PathPixmap(filepath)
 
-        if not pixmap.isNull():
-            pixmap = pixmap.scaled(
+        if not pixmaps.isNull():
+            pixmaps = pixmaps.scaled(
                 *self.size, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation
             )
 
-        self.setPixmap(pixmap)
+        self.setPixmap(pixmaps)
         self.setScaledContents(False)
 
 

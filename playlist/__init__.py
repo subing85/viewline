@@ -34,8 +34,10 @@ class Versions(object):
 
         versions = resources.getPreset("versions")
 
-        result = list(
+        project_versions = list(
             filter(lambda x: x.get("project") and x["project"]["id"] == project["id"], versions)
         )
+
+        result = sorted(project_versions, key=lambda k: (k["created_at"]), reverse=True)
 
         return result

@@ -5,6 +5,7 @@
 
 from __future__ import absolute_import
 
+import utils
 import resources
 import constants
 
@@ -17,7 +18,7 @@ from widgets.pixmaps import NamePixmapIcon
 
 class DisplayMenus(QtWidgets.QMenu):
 
-    overlay_changed = QtCore.Signal(bool, str, str, dict)
+    display_changed = QtCore.Signal(bool, str, str, dict)
 
     def __init__(self, parent, **kwargs):
         super().__init__(parent)
@@ -39,21 +40,33 @@ class DisplayMenus(QtWidgets.QMenu):
                 )
                 self.addAction(action)
 
-                parameter = {"type": context.get("type", "text")}
+                # parameter = {"type": context.get("type", "text")}
 
-                if parameter["type"] == "text":
-                    parameter["font"] = context.get("font")
+                # if parameter["type"] == "text":
+                #     parameter["font"] = context.get("font")
 
-                if "opacity" in context and parameter["type"] == "image":
-                    parameter["opacity"] = context["opacity"]
+                # if "opacity" in context and parameter["type"] == "image":
+                #     parameter["opacity"] = context["opacity"]
 
                 action.toggled.connect(
                     lambda checked, key=context[
                         "code"
-                    ], pos=position, param=parameter: self.overlay_changed.emit(
+                    ], pos=position, param=context: self.display_changed.emit(
                         checked, key, pos, param
                     )
                 )
+
+    def update_watermarks(self, inputs, **kwargs):
+        self.watermarks = utils.overrideWatermarkValues(
+            inputs, watermarks=self.watermarks, **kwargs
+        )
+
+    def clear_watermarks(self):
+        for position in self.watermarks:
+            for overlay in self.watermarks[position]:
+                if not overlay.get("enable"):
+                    continue
+                overlay["value"] = None
 
 
 class DisplayAction(QtGui.QAction):

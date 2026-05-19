@@ -1,250 +1,223 @@
 # Review Player
 
-### Under development ###
-
 A professional Python-based review player framework for VFX, animation, and post-production workflows.
 
-This project is designed as a modern review/playback foundation similar to:
+This project is designed as a playback and review foundation inspired by internal studio review tools used across the animation and VFX industry.
 
-- RV
-- DJV
-- ShotGrid Create
-- Internal studio review tools
-
-The player supports:
-
-- Video playback
-- Image sequence playback
-- OpenEXR workflows
-- OpenColorIO (OCIO)
-- Frame-accurate stepping
-- Timeline scrubbing
-- OpenGL display rendering
+The goal of this project is to provide a lightweight, extensible, and production-friendly framework for media playback, image sequence review, OpenEXR workflows, and OCIO-based color management.
 
 ---
 
 # Features
 
-        Playback
+## Viewer
 
-        - MP4 playback
-        - MOV playback
-        - AVI playback
-        - PNG sequence playback
-        - JPEG sequence playback
-        - EXR sequence playback
+* Video playback
+* Image sequence playback
+* OpenEXR workflow support
+* OpenColorIO (OCIO) integration *(in progress)*
+* Frame-accurate stepping
+* Timeline scrubbing
+* OpenGL-based viewer
+* Dynamic fit-to-window display
+* Aspect ratio preservation
+* Frame stepping
+* Loop playback
+* Playback overlays / burn-ins
+* Cached frame visualization
+* AOV switching support
 
-        Viewer
+---
 
-        - OpenGL-based viewer
-        - Dynamic fit-to-window display
-        - Aspect ratio preservation
-        - Timeline scrubbing
-        - Frame stepping
-        - Loop playback
+## Playback
 
+Supported formats:
 
-        Color Management
+### Video
 
-        - OpenColorIO integration
-        - ACES-ready architecture
-        - Input color space selection
-        - Display transform selection
-        - View transform selection
+* MP4
+* MOV
+* AVI
 
-        Timeline
+### Image Sequences
 
-        - Frame-based timeline
-        - Current frame indicator
-        - Major/minor frame ticks
-        - Interactive scrubbing
+* PNG
+* JPEG
+* EXR
+
+---
+
+## Color Management
+
+* OpenColorIO integration
+* ACES workflow architecture *(in progress)*
+* Input color space selection *(in progress)*
+* Display transform selection *(in progress)*
+* View transform selection *(in progress)*
 
 ---
 
 # Project Structure
 
-        review_player/
-        │
-        ├── main.py
-        │
-        ├── ui/
-        │   ├── main_window.py
-        │   ├── viewer_widget.py
-        │   └── timeline_widget.py
-        │
-        ├── playback/
-        │   ├── media_player.py
-        │   ├── video_reader.py
-        │   ├── sequence_reader.py
-        │   └── frame_cache.py
-        │
-        ├── ocio/
-        │   └── ocio_processor.py
-        │
-        └── utils/
-            └── path_utils.py
+```text
+review_player
+├── constants
+│   └── __init__.py
+├── logger
+│   └── __init__.py
+├── main.py
+├── ocio
+│   └── __init__.py
+├── playback
+│   ├── cache.py
+│   ├── player.py
+│   └── reader.py
+├── playlist
+│   └── __init__.py
+├── resources
+│   ├── icons
+│   ├── __init__.py
+│   └── presets
+│       ├── projects.json
+│       ├── versions.json
+│       └── watermarks.json
+├── utils
+│   └── __init__.py
+└── widgets
+    ├── buttons.py
+    ├── comboboxs.py
+    ├── dialogs.py
+    ├── __init__.py
+    ├── labels.py
+    ├── layouts.py
+    ├── menus.py
+    ├── pixmaps.py
+    ├── playlist.py
+    ├── styles.py
+    ├── timeline.py
+    ├── treewidgets.py
+    ├── viewer.py
+    └── widgetItems.py
+```
+
+---
+
+# Playlist Customization
+
+The playlist system is designed to be customized based on studio workflows.
+
+Enhance the playlist module:
+
+```text
+./review_player/playlist/__init__.py
+```
+
+### Projects Class
+
+Update the `Projects` class to query project playlist data.
+
+The returned data structure should match:
+
+```text
+./review_player/resources/presets/projects.json
+```
+
+### Versions Class
+
+Update the `Versions` class to query media/version data.
+
+The returned data structure should match:
+
+```text
+./review_player/resources/presets/versions.json
+```
 
 ---
 
 # Architecture Overview
 
-        The project separates playback into multiple independent systems.
+The project separates playback into multiple independent systems.
 
-        Media Reader
-            ↓
-        Frame Cache
-            ↓
-        OCIO Processing
-            ↓
-        Viewer Rendering
-            ↓
-        Timeline/UI
-
-
-This modular structure allows future scalability.
-
----
-
-# Dependencies, Required Libraries
-
-| Library | Purpose |
-|-----|---|
-| PySide6 | UI framework |
-| PyOpenGL | OpenGL rendering |
-| NumPy | Image buffer processing |
-| PyAV | Video decoding |
-| OpenImageIO | Image sequence reading |
-| OpenColorIO | Color management |
-
----
-
-# Installation
-
-### Create Virtual Environment
-
-```bash
-python -m venv venv
-```
-
-
-### Activate Environment
-
-### Linux
-
-```bash
-source venv/bin/activate
-```
-
-### Windows
-
-```bash
-venv\Scripts\activate
+```text
+Media Reader
+    ↓
+Frame Cache
+    ↓
+OCIO Processing
+    ↓
+Viewer Rendering
+    ↓
+Timeline / UI
 ```
 
 ---
 
-## Install Dependencies
+# Dependencies
 
-```bash
-pip install PySide6
-pip install numpy
-pip install av
-pip install OpenImageIO
-pip install opencolorio
-pip install PyOpenGL
-```
+| Library     | Purpose                 |
+| ----------- | ----------------------- |
+| PySide6     | UI framework            |
+| PyOpenGL    | OpenGL rendering        |
+| NumPy       | Image buffer processing |
+| PyAV        | Video decoding          |
+| OpenImageIO | Image sequence reading  |
+| OpenColorIO | Color management        |
 
 ---
 
-# OpenColorIO Setup
+# Required Libraries
 
-The review player requires an OCIO configuration file.
+```text
+requests: 2.32.2
+    certifi: 2024.2.2
+    idna: 3.7
+    urllib3: 2.2.1
 
-Example:
+PySide6: 6.9.0
+    shiboken6: 6.9.0
+    PySide6-Essentials: 6.9.0
+    PySide6-Addons: 6.9.0
 
-```bash
-export OCIO=/path/to/config.ocio
+pyqtdarktheme: 2.1.0
+    darkdetect: 0.7.1
+
+OpenImageIO: 3.0.4.0
+
+PyOpenGL: 3.1.9
+opencolorio: 2.5.0
+av: 17.0.0
+numpy: 1.26.4
 ```
 
 ---
 
 # Recommended OCIO Config
 
-Recommended:
-
-ACES 1.3 Config
+## ACES 1.3 Config
 
 Official repository:
 
+```text
 https://github.com/AcademySoftwareFoundation/OpenColorIO-Config-ACES
-
----
-
-# Running The Player
-
-```bash
-python main.py
 ```
-
----
-
-# Supported Formats
-
-## Video / Image
-
-| Format | Supported |
-|---|---|
-| mp4 | YES |
-| mov | YES |
-| avi | YES |
-| png | YES |
-| jpg | YES |
-| jpeg | YES |
-| exr | YES |
-
----
-
-# Playback Controls
-
-| Control | Action |
-|---|---|
-| Open | Load media |
-| Play | Start playback |
-| Stop | Stop playback |
-| << | Previous frame |
-| >> | Next frame |
-
----
-
-# Current Limitations
-
-This project is currently an early playback framework.
-
-Known limitations:
-
-- OpenGL uses glDrawPixels()
-- No GPU texture rendering yet
-- No threaded decoding
-- Video decoding loads all frames into memory
-- EXR playback currently converts float images to uint8 preview
-- No HDR display pipeline yet
-- No audio synchronization
-- No annotation system
 
 ---
 
 # EXR Support
 
-The player supports:
+The player currently supports:
 
-- Single-layer EXR
-- Multi-layer EXR
-- RGB layer extraction
+* Single-layer EXR
+* Multi-layer EXR
+* RGB layer extraction
+* Basic AOV switching
 
-The EXR reader automatically searches for valid RGB layers such as:
+The EXR reader automatically searches for valid RGB layers.
+
+Example supported channel patterns:
 
 ```text
-RGB
+R G B
 beauty.R beauty.G beauty.B
 rgba.R rgba.G rgba.B
 Ci.R Ci.G Ci.B
@@ -252,7 +225,7 @@ Ci.R Ci.G Ci.B
 
 ---
 
-# OCIO Workflow
+# OCIO Workflow (In Progress)
 
 Typical workflow:
 
@@ -268,11 +241,28 @@ sRGB Monitor
 
 # Recommended Professional Workflow
 
-| Input | Display |
-|---|---|
-| ACEScg | Rec709 |
-| Linear | sRGB |
-| UtilityRaw | Raw |
+| Input      | Display |
+| ---------- | ------- |
+| ACEScg     | Rec709  |
+| Linear     | sRGB    |
+| UtilityRaw | Raw     |
+
+---
+
+# Current Limitations
+
+This project is currently an early playback framework.
+
+Known limitations:
+
+* OpenGL currently uses `glDrawPixels()`
+* No GPU texture rendering yet
+* No threaded decoding
+* Video decoding may load many frames into memory
+* EXR playback currently converts float images into uint8 previews
+* No HDR display pipeline yet
+* No audio synchronization
+* No annotation system
 
 ---
 
@@ -280,115 +270,59 @@ sRGB Monitor
 
 ## Playback
 
-- Threaded decoding
-- Async frame prefetch
-- Smart frame cache
-- GPU upload pipeline
+* Threaded decoding
+* Async frame prefetch
+* Smart frame cache
+* GPU upload pipeline
 
 ---
 
 ## Viewer
 
-- OpenGL texture rendering
-- GPU OCIO transforms
-- Zoom
-- Pan
-- Fit modes
-- Pixel inspection
+* OpenGL texture rendering
+* GPU OCIO transforms
+* Zoom
+* Pan
+* Fit modes
+* Pixel inspection
 
 ---
 
 ## Timeline
 
-- Timeline zoom
-- Cached frame visualization
-- Frame markers
-- Notes/comments
-- In/out ranges
+* Timeline zoom
+* Cached frame visualization
+* Frame markers
+* Notes/comments
+* In/out ranges
 
 ---
 
 ## EXR Features
 
-- Layer browser
-- AOV switching
-- Deep EXR support
-- Metadata viewer
-- Multi-part EXR support
+* Layer browser
+* AOV switching
+* Deep EXR support
+* Metadata viewer
+* Multi-part EXR support
 
 ---
 
 ## Review System
 
-- Task integration
-- Version integration
-- Notes/comments
-- Draw annotations
-- Review sessions
+* Task integration
+* Version integration
+* Notes/comments
+* Draw annotations
+* Review sessions
 
 ---
 
-# Professional Rendering Direction
+## Integrations
 
-Current prototype:
-
-```text
-CPU Image
-    ↓
-glDrawPixels()
-```
-
-Future architecture:
-
-```text
-CPU/GPU Decode
-    ↓
-OpenGL Texture
-    ↓
-OCIO GPU Shader
-    ↓
-Viewer
-```
-
----
-
-# Suggested Future Integrations
-
-- Autodesk Flow Production Tracking (ShotGrid)
-- USD pipelines
-- FFmpeg render export
-- Nuke review pipeline
-- Editorial workflow
-- RV-compatible controls
-
----
-
-# Recommended Development Order
-
-## Phase 1
-
-- Stable playback
-- EXR support
-- Timeline
-- OCIO
-
----
-
-## Phase 2
-
-- OpenGL textures
-- GPU OCIO
-- Cache system
-- Threaded playback
-
----
-
-## Phase 3
-
-- Review annotations
-- Notes/comments
-- Version browser
-- Task integration
+* USD pipelines
+* FFmpeg render export
+* Editorial workflow
 
 ---
 
@@ -400,4 +334,4 @@ Subin Gopi
 
 # License
 
-Internal Development / Prototype
+This project is intended as a free educational and production workflow framework for the animation and VFX industry.

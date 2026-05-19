@@ -9,6 +9,7 @@ import os
 
 import utils
 import logger
+import resources
 import constants
 
 from PySide6 import QtGui
@@ -19,6 +20,8 @@ from ocio import OCIOProcessor
 
 from playlist import Projects
 from playlist import Versions
+
+from widgets.pixmaps import PathPixmap
 
 from widgets.buttons import HelpButton
 from widgets.buttons import OpenButton
@@ -62,6 +65,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.player = MediaPlayer()
 
         self.projects = Projects.get()
+        self.current_project = None
 
         self.setupUi()
         self.setupIcons()
@@ -164,7 +168,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.backwordButton.clicked.connect(self.backword_frame)
         self.forwardButton.clicked.connect(self.forward_frame)
 
-        self.displayMenuButton.menu.overlay_changed.connect(self.viewer.set_overlay_option)
+        self.displayMenuButton.menu.display_changed.connect(self.viewer.set_overlay_option)
+
+        self.viewer.set_overlay_options(self.displayMenuButton.menu.watermarks)
 
         self.helpButton.clicked.connect(self.help)
 
@@ -187,6 +193,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.helpShortcut = QtGui.QShortcut(QtGui.QKeySequence("F2"), self)
         self.helpShortcut.activated.connect(self.help)
 
+        if self.projects:
+            self.set_playlist(self.projects[0])
+
         if constants.MAXIMIZE:
             self.showMaximized()
 
@@ -199,12 +208,20 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setWindowIcon(pixmap)
 
     def set_playlist(self, project):
+        self.current_project = project
         versions = Versions.get(project)
         self.playlistGroup.set_versions(versions)
 
     def play_from_playlist(self, play, context):
         if not context.get("media"):
+            self.viewer.clear()
             return
+
+        logs = {
+            "project_logo": self.current_project["value"],
+            "studio_logo": PathPixmap(resources.getIconFilepath(constants.STUDIO_NAME)),
+        }
+        self.displayMenuButton.menu.update_watermarks(context, **logs)
 
         self.openMedia(filepath=context.get("media"))
 
@@ -212,27 +229,26 @@ class MainWindow(QtWidgets.QMainWindow):
             self.toggle_play_pause()
 
     def openMedia(self, filepath=None):
-        """
         if not filepath:
             dialog = OpenMediaDialog(self, browsepath=self.browsepath)
             if dialog.exec():
                 filepath = dialog.getfile()
                 self.browsepath = os.path.dirname(filepath)
 
+            logs = {"studio_logo": PathPixmap(resources.getIconFilepath(constants.STUDIO_NAME))}
+            self.displayMenuButton.menu.update_watermarks(dict(), **logs)
+
         self.viewer.clear()
 
         if not filepath:
             return
-        """
 
-        filepath = (
-            "/run/media/batman/ALPHA/works/C2C/samples/footage/shot-1001-1/shot-1001.####.png"
-        )
+        # filepath = "/run/media/batman/ALPHA/works/C2C/samples/footage/shot-1001-1/shot-1001.####.png"
 
         LOGGER.info(f"Source filepath, {filepath}")
 
         self.player.load(filepath)
-        # self.reset_video_fps()
+        self.reset_video_fps()
 
         if self.player.reader.media_type == "sequence":
             self.aovsCombobox.setEnabled(True)

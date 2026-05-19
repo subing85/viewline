@@ -118,8 +118,8 @@ class MediaPlayer(QtCore.QObject):
         if not self.reader:
             return
 
-        # if self.current_frame >= self.end_frame:
-        #     self.current_frame = self.start_frame
+        if self.current_frame >= self.end_frame - 1:
+            self.current_frame = self.start_frame
 
         fps = self.reader.get_fps()
 

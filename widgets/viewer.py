@@ -16,6 +16,8 @@ from PySide6 import QtWidgets
 from PySide6 import QtOpenGLWidgets
 
 from widgets.styles import Font
+from widgets.pixmaps import UrlPixmap
+from widgets.pixmaps import PathPixmap
 
 
 class ViewerWidget(QtOpenGLWidgets.QOpenGLWidget):
@@ -31,6 +33,14 @@ class ViewerWidget(QtOpenGLWidgets.QOpenGLWidget):
 
         self.frame = None
         self.current_frame = None
+
+        (
+            self.image_height,
+            self.image_width,
+        ) = (
+            None,
+            None,
+        )
 
         self.overlay_options = {
             "top_left": {},
@@ -68,14 +78,14 @@ class ViewerWidget(QtOpenGLWidgets.QOpenGLWidget):
 
         image = numpy.flipud(self.frame)
         image = numpy.ascontiguousarray(image)
-        image_height, image_width, channels = image.shape
+        self.image_height, self.image_width, channels = image.shape
 
         dpr = self.devicePixelRatioF()
 
         viewport_width = int(self.width() * dpr)
         viewport_height = int(self.height() * dpr)
 
-        image_aspect = image_width / image_height
+        image_aspect = self.image_width / self.image_height
         viewport_aspect = viewport_width / viewport_height
 
         # Fit Image
@@ -102,9 +112,9 @@ class ViewerWidget(QtOpenGLWidgets.QOpenGLWidget):
 
         # Draw image
         GL.glRasterPos2i(x, y)
-        GL.glPixelZoom(draw_width / image_width, draw_height / image_height)
+        GL.glPixelZoom(draw_width / self.image_width, draw_height / self.image_height)
         gl_format = GL.GL_RGBA if channels == 4 else GL.GL_RGB
-        GL.glDrawPixels(image_width, image_height, gl_format, GL.GL_UNSIGNED_BYTE, image)
+        GL.glDrawPixels(self.image_width, self.image_height, gl_format, GL.GL_UNSIGNED_BYTE, image)
 
         # Reset zoom
         GL.glPixelZoom(1, 1)
@@ -122,6 +132,11 @@ class ViewerWidget(QtOpenGLWidgets.QOpenGLWidget):
 
         # Overlay
         self.draw_overlay()
+
+    def set_overlay_options(self, watermarks):
+        for position, values in watermarks.items():
+            for context in values:
+                self.set_overlay_option(context["checked"], context["code"], position, context)
 
     def set_overlay_option(self, checked, key, position, context):
         if position not in self.overlay_options:
@@ -145,9 +160,7 @@ class ViewerWidget(QtOpenGLWidgets.QOpenGLWidget):
 
         rect = self.display_rect
 
-        watermark_inputs = resources.getPreset("watermarks")
-
-        for position in watermark_inputs:
+        for position in self.overlay_options:
             self.draw_overlay_position(painter, rect, position)
 
         painter.end()
@@ -203,42 +216,51 @@ class ViewerWidget(QtOpenGLWidgets.QOpenGLWidget):
 
             # IMAGE
             if typed == "image":
-                pixmap = self.get_overlay_pixmap(key)
+                pixmap = context["value"]
+                scaled = pixmap.scaledToHeight(50, QtCore.Qt.SmoothTransformation)
+                draw_x = x
 
-                if pixmap:
-                    scaled = pixmap.scaledToHeight(50, QtCore.Qt.SmoothTransformation)
-                    draw_x = x
+                if align == "center":
+                    draw_x -= scaled.width() / 2
+                elif align == "right":
+                    draw_x -= scaled.width()
 
-                    if align == "center":
-                        draw_x -= scaled.width() / 2
-                    elif align == "right":
-                        draw_x -= scaled.width()
+                # TOP / BOTTOM DIRECTION
+                if reverse_vertical:
+                    draw_y = y - scaled.height()
+                else:
+                    draw_y = y
 
-                    # TOP / BOTTOM DIRECTION
-                    if reverse_vertical:
-                        draw_y = y - scaled.height()
-                    else:
-                        draw_y = y
+                # Opacity
+                opacity = context.get("opacity", 1.0)
+                painter.setOpacity(opacity)
 
-                    # Opacity
-                    opacity = context.get("opacity", 1.0)
-                    painter.setOpacity(opacity)
+                # Draw
+                path = painter.drawPixmap(int(draw_x), int(draw_y), scaled)
 
-                    # Draw
-                    path = painter.drawPixmap(int(draw_x), int(draw_y), scaled)
+                # Reset Opacity
+                painter.setOpacity(1.0)
 
-                    # Reset Opacity
-                    painter.setOpacity(1.0)
+                offset = scaled.height() + 10
 
-                    offset = scaled.height() + 10
-
-                    if reverse_vertical:
-                        y -= offset
-                    else:
-                        y += offset
+                if reverse_vertical:
+                    y -= offset
+                else:
+                    y += offset
             # TEXT
             else:
-                text = self.get_overlay_text(key)
+                # text = self.get_overlay_text(key)
+                if key == "frame":
+                    text = f"Frame: {str(self.current_frame).zfill(constants.FRAME_PADDING)}"
+
+                elif key == "resolution":
+                    text = f"{self.image_width} x {self.image_height}"
+                else:
+                    text = (
+                        f"{context['label']}: {context['value']}"
+                        if context.get("label")
+                        else context["value"]
+                    )
 
                 # Accurate Text Width
                 font = Font(None, **context["font"])
@@ -315,20 +337,6 @@ class ViewerWidget(QtOpenGLWidgets.QOpenGLWidget):
         painter.fillPath(path, fill_color)
 
         return path
-
-    def get_overlay_text(self, key):
-        values = {
-            "project": "Project: Demo",
-            "shot": "Shot: SH010",
-            "task": "Task: Lighting",
-            "version": "Version: v001",
-            "date": f"Date: {QtCore.QDate.currentDate().toString()}",
-            "artist": "Artist: Batman Hero",
-            "resolution": f"{'1920'} x {'1080'}",
-            "frame": f"Frame: {str(self.current_frame).zfill(constants.FRAME_PADDING)}",
-            "copyright": "Support, Subin. Gopi (subing85@gmail.com).",
-        }
-        return values.get(key, key)
 
 
 if __name__ == "__main__":

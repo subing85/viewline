@@ -2,10 +2,11 @@
     "top_left": [
         {
             "code": "project",
+            "label": "project",
             "enable": true,
-            "checked": false,
+            "checked": true,
             "font": {
-                "size": 10,
+                "size": 15,
                 "family": "Noto Sans",
                 "fillColor": [
                     255,
@@ -31,11 +32,12 @@
             }
         },
         {
-            "code": "shot",
+            "code": "entity",
+            "label": "shot",
             "enable": true,
-            "checked": false,
+            "checked": true,
             "font": {
-                "size": 10,
+                "size": 15,
                 "family": "Noto Sans",
                 "fillColor": [
                     255,
@@ -60,11 +62,12 @@
             }
         },
         {
-            "code": "task",
+            "code": "sg_task",
+            "label": "shot",
             "enable": true,
-            "checked": false,
+            "checked": true,
             "font": {
-                "size": 10,
+                "size": 15,
                 "family": "Noto Sans",
                 "fillColor": [
                     255,
@@ -89,11 +92,12 @@
             }
         },
         {
-            "code": "version",
+            "code": "code",
+            "label": "version",
             "enable": true,
-            "checked": false,
+            "checked": true,
             "font": {
-                "size": 10,
+                "size": 15,
                 "family": "Noto Sans",
                 "fillColor": [
                     255,
@@ -120,11 +124,12 @@
     ],
     "top_right": [
         {
-            "code": "date",
+            "code": "created_at",
+            "label": "date",
             "enable": true,
-            "checked": false,
+            "checked": true,
             "font": {
-                "size": 10,
+                "size": 15,
                 "family": "Noto Sans",
                 "fillColor": [
                     255,
@@ -149,11 +154,12 @@
             }
         },
         {
-            "code": "artist",
+            "code": "created_by",
+            "label": "artist",
             "enable": true,
-            "checked": false,
+            "checked": true,
             "font": {
-                "size": 10,
+                "size": 15,
                 "family": "Noto Sans",
                 "fillColor": [
                     255,
@@ -182,9 +188,9 @@
         {
             "code": "resolution",
             "enable": true,
-            "checked": false,
+            "checked": true,
             "font": {
-                "size": 15,
+                "size": 20,
                 "family": "Noto Sans",
                 "fillColor": [
                     255,
@@ -211,18 +217,18 @@
     ],
     "bottom_left": [
         {
-            "code": "Project Logo",
+            "code": "project-logo",
             "enable": true,
-            "checked": false,
+            "checked": true,
             "type": "image",
             "opacity": 0.75
         }
     ],
     "bottom_right": [
         {
-            "code": "Studio Logo",
+            "code": "studio-logo",
             "enable": true,
-            "checked": false,
+            "checked": true,
             "type": "image",
             "opacity": 0.7
         }
@@ -231,7 +237,7 @@
         {
             "code": "frame",
             "enable": true,
-            "checked": false,
+            "checked": true,
             "font": {
                 "size": 15,
                 "family": "Noto Sans",
@@ -262,7 +268,7 @@
         {
             "code": "copyright",
             "enable": true,
-            "checked": false,
+            "checked": true,
             "font": {
                 "size": 25,
                 "family": "Noto Sans",
@@ -286,7 +292,7 @@
                     0
                 ],
                 "capitalization": "mixedCase",
-                "opacity": 0.1
+                "opacity": 0.5
             }
         }
     ]
