@@ -1,84 +1,82 @@
-# Copyright (c) 2026, Motion-Craft Technology All rights reserved.
-# Author: Subin. Gopi (subing85@gmail.com).
-# Description: Logger module.
-# WARNING! All changes made in this file will be lost when recompiling source file!
+"""
+Copyright (c) 2026, Motion-Craft Technology All rights reserved.
+Author: Subin. Gopi (subing85@gmail.com).
+Description: Review Player logging utility module. Centralized logging configuration for the Review Player framework.
+WARNING! All changes made in this file will be lost when recompiling source file!
 
+The logger system is designed to:
+    - Standardize logging output
+    - Simplify debugging
+    - Provide formatted console logging
+    - Prevent duplicate handlers
+    - Support module-based logging
+
+"""
 
 from __future__ import absolute_import
 
-import os
 import sys
 import logging
-import tempfile
-
-
-def Logger(**kwargs):
-    tempdirname = os.path.join(tempfile.gettempdir(), "studio-pipe")
-    if not os.path.isdir(tempdirname):
-        os.makedirs(tempdirname)
-    filename = kwargs.get("filename") or "pipe"
-    filepath = os.path.join(tempdirname, "%s.log" % filename)
-    format = "# %(asctime)s %(levelname)6s: %(module)s-line: %(lineno)d | %(message)s"
-    date = "%Y/%m/%d %I:%M:%S:%p"
-    formatter = logging.Formatter(fmt=format, datefmt=date)
-    logging.basicConfig(
-        filename=filepath,
-        format=format,
-        datefmt=date,
-        filemode="a",
-        level=logging.DEBUG,
-    )
-    logget = logging.getLogger()
-    logget.setLevel(logging.DEBUG)
-    handler = logging.StreamHandler(stream=sys.stdout)
-    handler.setFormatter(formatter)
-    logging.getLogger().addHandler(handler)
-
-    return logget
 
 
 def getLogger(name):
+    """Create and return a configured logger instance.
+
+    This function creates a standardized logger used throughout the
+    Review Player framework.
+
+    If the logger already contains handlers, new handlers will not
+    be added again. This prevents duplicate logging output.
+
+    The logger output format includes:
+        - Timestamp
+        - Log level
+        - Module name
+        - Source line number
+        - Message
+
+    Args:
+        name (str):
+            Logger name, typically ``__name__``.
+
+    Returns:
+        logging.Logger:
+            Configured logger instance.
+
+    Example:
+        >>> import logger
+        >>> LOGGER = logger.getLogger(__name__)
+        >>> LOGGER.info("Viewer initialized")
+
+    Output:
+        # 2026/05/20 10:15:12:PM    INFO:
+        playback.player-line: 45 | Playback started
+
+    Notes:
+        - Logging level defaults to ``logging.INFO``.
+        - Output stream uses ``sys.stdout``.
+        - Logger propagation is disabled.
+    """
+
     logger = logging.getLogger(name)
     logger.setLevel(logging.INFO)
 
     if not logger.handlers:  # Prevent adding multiple handlers
+        # Log Format
         format = "# %(asctime)s%(levelname)8s: %(name)s-line: %(lineno)d | %(message)s"
         date = "%Y/%m/%d %I:%M:%S:%p"
         formatter = logging.Formatter(fmt=format, datefmt=date)
 
+        # Stream Handler
         handler = logging.StreamHandler(stream=sys.stdout)
         handler.setFormatter(formatter)
 
         logger.addHandler(handler)
+
+        # Disable Propagation
         logger.propagate = False
 
     return logger
-
-
-def logTypes():
-    types = [
-        "info",
-        "critical",
-        "error",
-        "warning",
-        "warn",
-        "debug",
-    ]
-    print(types)
-    return types
-
-
-def nextLine():
-    print("\n")
-
-
-def verbose(value):
-    print(value)
-
-
-def separator(nextline=False):
-    value = f"\n{'#'*60}" if nextline else "#" * 60
-    print(value)
 
 
 if __name__ == "__main__":
