@@ -154,6 +154,10 @@ Timeline / UI
 
 ---
 
+# Python Version
+
+python-3.10.10 or +
+
 # Dependencies
 
 | Library     | Purpose                 |
@@ -174,6 +178,7 @@ requests: 2.32.2
     certifi: 2024.2.2
     idna: 3.7
     urllib3: 2.2.1
+    charset-normalizer: 3.3.2
 
 PySide6: 6.9.0
     shiboken6: 6.9.0
