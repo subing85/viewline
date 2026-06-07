@@ -46,8 +46,11 @@ import re
 import utils
 import constants
 
+from PySide6 import QtGui
 from PySide6 import QtCore
 from PySide6 import QtWidgets
+
+from widgets.styles import SetStylesheet
 
 
 class SequenceDisplayDelegate(QtWidgets.QStyledItemDelegate):
@@ -295,6 +298,44 @@ class OpenMediaDialog(QtWidgets.QFileDialog):
             path = utils.pathResolver(dirname, filename=pattern_name)
 
         return path
+
+
+class ColorDialog(QtWidgets.QColorDialog):
+
+    def __init__(self, parent, **kwargs):
+        super().__init__(parent)
+
+        SetStylesheet(self, theme=constants.DEFAULT_THEME)
+
+    def getColor(self):
+        color_form = self.selectedColor()
+
+        if not color_form.isValid():
+            return
+
+        color = (color_form.red(), color_form.green(), color_form.blue())
+
+        return color
+
+
+class FileDialog(QtWidgets.QFileDialog):
+    def __init__(self, parent, title, **kwargs):
+        super().__init__(parent)
+
+        self.title = title
+        self.browsepath = kwargs.get("browsepath") or QtCore.QDir.homePath()
+
+        self.extensions = kwargs.get("extensions", ["txt"])
+        self.label = kwargs.get("label", "txt")
+
+        self.extensions = kwargs.get("extensions")
+
+    def savefile(self, name):
+        filename = f"{name}.{self.extensions[0]}" if name else f"untitle.{self.extensions[0]}"
+        pattern = ";;".join(f"{ext.upper()} (*.{ext.lower()})" for ext in self.extensions)
+        filepath, fileFormat = self.getSaveFileName(self, self.title, filename, pattern)
+
+        return filepath
 
 
 if __name__ == "__main__":

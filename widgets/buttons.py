@@ -49,6 +49,7 @@ from PySide6 import QtCore
 from PySide6 import QtWidgets
 
 from widgets.menus import DisplayMenus
+from widgets.dialogs import ColorDialog
 from widgets.pixmaps import NamePixmapIcon
 
 
@@ -111,6 +112,9 @@ class IconButton(QtWidgets.QPushButton):
 
         # Fixed Size Lock
         self.locked = False if kwargs.get("locked") == False else True
+
+        if kwargs.get("checkable"):
+            self.setCheckable(kwargs["checkable"])
 
         # Tooltip
         if kwargs.get("tooltip"):
@@ -186,10 +190,157 @@ class ForwardButton(IconButton):
     name = "forward"
 
 
+class PencilButton(IconButton):
+    """Pencil button."""
+
+    name = "pencil"
+
+
+class ArrowButton(IconButton):
+    """Arrow button."""
+
+    name = "arrow"
+
+
+class EllipseButton(IconButton):
+    """Ellipse button."""
+
+    name = "ellipse"
+
+
+class RectangleButton(IconButton):
+    """Rectangle button."""
+
+    name = "rectangle"
+
+
+class EraserButton(IconButton):
+    """Erasier button."""
+
+    name = "eraser"
+
+
+class TxtButton(IconButton):
+    """Txt button."""
+
+    name = "txt"
+
+
+class MoveButton(IconButton):
+    """Move button."""
+
+    name = "move"
+
+
+class UndoButton(IconButton):
+    """Undo button."""
+
+    name = "undo"
+
+
+class ClearButton(IconButton):
+    """Clear button."""
+
+    name = "clear"
+
+
+class RenderButton(IconButton):
+    """Render button."""
+
+    name = "render"
+
+
 class HelpButton(IconButton):
     """Help/documentation button."""
 
     name = "help"
+
+
+class TextButton(QtWidgets.QPushButton):
+
+    def __init__(self, parent, **kwargs):
+        super(TextButton, self).__init__(parent)
+
+        if kwargs.get("toolTip"):
+            self.setToolTip(kwargs["toolTip"])
+
+        if kwargs.get("label"):
+            self.setText(kwargs["label"])
+
+        self.setAutoDefault(False)
+        self.setDefault(False)
+
+
+class ColorButton(QtWidgets.QPushButton):
+
+    color_changed = QtCore.Signal(tuple)
+
+    def __init__(self, parent, **kwargs):
+        # Initialize QPushButton
+        super(ColorButton, self).__init__(parent)
+
+        # Button Size
+        self.width = kwargs.get("width", 22)
+        self.height = kwargs.get("height", 22)
+
+        self.color = (255, 0, 0)  # Red
+        # Fixed Size Lock
+        self.locked = False if kwargs.get("locked") == False else True
+
+        # Tooltip
+        if kwargs.get("tooltip"):
+            self.setToolTip(kwargs["tooltip"])
+
+        # Flat Button Style
+        self.setFlat(True)
+
+        # Apply Fixed Size
+        if self.locked:
+            self.setMinimumSize(QtCore.QSize(self.width, self.height))
+            self.setMaximumSize(QtCore.QSize(self.width, self.height))
+
+        self.setStyleSheet(
+            f"border-radius: {self.width/2}px; border: 1px solid #ffffff;background-color: rgb{self.color};"
+        )
+        # self.setStyleSheet(
+        #     "QComboBox {background: transparent; border: none;} QComboBox::down-arrow {width: 0px;height: 0px;}"
+        # )
+
+        self.setAutoDefault(False)
+        self.setDefault(False)
+
+        self.clicked.connect(self.pick_color)
+
+    def pick_color(self):
+        color_dialog = ColorDialog(self)
+
+        if color_dialog.exec():
+            result = color_dialog.getColor()
+            # color_form = QtWidgets.QColorDialog.getColor()
+
+            if not result:
+                return
+
+            self.color = result
+
+            self.setStyleSheet(
+                f"border-radius: {self.width/2}px; border: 1px solid #ffffff;background-color: rgb{self.color};"
+            )
+
+            self.color_changed.emit(self.color)
+
+
+class TextToolButton(QtWidgets.QToolButton):
+
+    def __init__(self, parent, value, **kwargs):
+        super(TextToolButton, self).__init__(parent)
+
+        # self.name = kwargs.get("name")
+
+        self.setText(value)
+
+        if kwargs.get("checkable"):
+            self.setCheckable(kwargs["checkable"])
 
 
 class ToolButton(QtWidgets.QToolButton):
