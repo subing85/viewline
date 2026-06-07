@@ -42,6 +42,7 @@ from __future__ import absolute_import
 import utils
 import constants
 
+from PySide6 import QtGui
 from PySide6 import QtCore
 from PySide6 import QtWidgets
 
@@ -181,6 +182,51 @@ class ProjectIconLabel(QtWidgets.QLabel):
 
         # Disable Stretch Scaling
         self.setScaledContents(False)
+
+
+class RightLabel(QtWidgets.QLabel):
+    def __init__(self, parent, value, **kwargs):
+        super(RightLabel, self).__init__(parent)
+
+        self.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter)
+
+        self.setText(value)
+
+    def setValue(self, value):
+        self.setText(value)
+
+
+class ThicknesLabel(RightLabel):
+    def __init__(self, parent, value, **kwargs):
+        super(ThicknesLabel, self).__init__(parent, value, **kwargs)
+
+        self.setMinimumSize(QtCore.QSize(63, 0))
+        # self.setMaximumSize(QtCore.QSize(128, 72))
+
+
+class ToolNameLabel(QtWidgets.QLabel):
+    def __init__(self, parent, *args, **kwargs):
+        super(ToolNameLabel, self).__init__(parent)
+
+        self.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+
+        if args:
+            self.setText(args[0])
+
+        self.setMinimumSize(QtCore.QSize(70, 0))
+        self.setMaximumSize(QtCore.QSize(70, 16777215))
+
+        self.setStyleSheet("background: transparent; border: none;color: rgb(85, 170, 255)")
+
+        font = self.font()
+        font.setBold(True)
+        self.setFont(font)
+
+    def setValue(self, enabled, value=None):
+        if enabled and value:
+            self.setText(value.capitalize())
+        else:
+            self.clear()
 
 
 if __name__ == "__main__":

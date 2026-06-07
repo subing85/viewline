@@ -70,8 +70,8 @@ from PySide6 import QtCore
 from PySide6 import QtWidgets
 from PySide6 import QtOpenGLWidgets
 
-from widgets.styles import Font
 from widgets.pixmaps import PathPixmap
+from widgets.annotations import Sketch
 
 
 class ViewerWidget(QtOpenGLWidgets.QOpenGLWidget):
@@ -123,22 +123,10 @@ class ViewerWidget(QtOpenGLWidgets.QOpenGLWidget):
         self.current_frame = None
 
         # Source image dimensions
-        self.image_height = None
         self.image_width = None
+        self.image_height = None
 
-        # Overlay storage
-        self.overlay_options = {
-            "top_left": dict(),
-            "top_right": dict(),
-            "top_center": dict(),
-            "center": dict(),
-            "bottom_left": dict(),
-            "bottom_right": dict(),
-            "bottom_center": dict(),
-        }
-
-        # Cached overlay pixmaps
-        self.overlay_pixmaps = dict()
+        self.annotations = Sketch()
 
     def set_frame(self, frame):
         """
@@ -150,6 +138,8 @@ class ViewerWidget(QtOpenGLWidgets.QOpenGLWidget):
         """
 
         self.frame = frame
+
+        #  print("\nself.frame =", self.frame)
 
         # Refresh OpenGL widget
         self.update()
@@ -164,6 +154,7 @@ class ViewerWidget(QtOpenGLWidgets.QOpenGLWidget):
         """
 
         self.current_frame = frame
+        self.annotations.set_frame(frame)
 
     def initializeGL(self):
         """
@@ -289,52 +280,6 @@ class ViewerWidget(QtOpenGLWidgets.QOpenGLWidget):
         # Draw overlays
         self.draw_overlay()
 
-    def set_overlay_options(self, watermarks):
-        """
-        Set all overlay options.
-
-        Args:
-            watermarks (dict):
-                Watermark configuration dictionary.
-        """
-
-        for position, values in watermarks.items():
-            for context in values:
-                self.set_overlay_option(context["checked"], context["code"], position, context)
-
-    def set_overlay_option(self, checked, key, position, context):
-        """
-        Update a single overlay option.
-
-        Args:
-            checked (bool):
-                Overlay enabled state.
-
-            key (str):
-                Overlay identifier.
-
-            position (str):
-                Overlay screen position.
-
-            context (dict):
-                Overlay settings.
-        """
-
-        # Create position group if missing
-        if position not in self.overlay_options:
-            self.overlay_options[position] = dict()
-
-        # Create overlay entry if missing
-        if key not in self.overlay_options[position]:
-            self.overlay_options[position][key] = dict()
-
-        # Store overlay configuration
-        self.overlay_options[position][key] = context
-        self.overlay_options[position][key]["checked"] = checked
-
-        # Refresh widget
-        self.update()
-
     def draw_overlay(self):
         """
         Draw all overlays.
@@ -357,208 +302,186 @@ class ViewerWidget(QtOpenGLWidgets.QOpenGLWidget):
         rect = self.display_rect
 
         # Draw overlays by position
-        for position in self.overlay_options:
-            self.draw_overlay_position(painter, rect, position)
+        # for position in self.overlay_options:
+        #     self.draw_overlay_position(painter, rect, position)
+
+        # Draw pencil annotations
+        self.annotations.draw(
+            painter, point_converter=self.image_to_widget_point, rect=self.display_rect
+        )
 
         painter.end()
 
-    def draw_overlay_position(self, painter, rect, position):
+    def set_overlay_options(self, watermarks):
+        self.annotations.set_overlays(watermarks)
+        self.update()
+
+    def set_overlay_option(
+        self,
+        checked,
+        key,
+        position,
+        context,
+    ):
+        self.annotations.set_overlay(checked, key, position, context)
+        self.update()
+
+    def set_sketch_enabled(self, tool, enabled, font):
         """
-        Draw overlays for a specific position group.
+        Enable or disable pencil tool.
 
         Args:
-            painter (QtGui.QPainter):
-                Painter object.
-
-            rect (QtCore.QRect):
-                Display rectangle.
-
-            position (str):
-                Overlay position.
+            enabled (bool): Pencil tool state.
         """
 
-        overlays = self.overlay_options.get(position, dict())
-        if not overlays:
+        if not self.current_frame:
             return
 
-        metrics = QtGui.QFontMetrics(painter.font())
-        margin, spacing = 20, 20
+        self.annotations.set_tool(tool)
+        self.annotations.set_enabled(enabled)
 
-        # Resolve overlay anchor position
-        if position == "top_left":
-            x = rect.left() + margin
-            y = rect.top() + margin  # 40
-            align = "left"
-        elif position == "top_center":
-            x = rect.center().x()
-            y = rect.top() + margin  # 40
-            align = "center"
-        elif position == "top_right":
-            x = rect.right() - margin
-            y = rect.top() + margin  # 40
-            align = "right"
-        elif position == "bottom_left":
-            x = rect.left() + margin
-            y = rect.bottom() - margin  # 40
-            align = "left"
-        elif position == "bottom_center":
-            x = rect.center().x()
-            y = rect.bottom() - metrics.descent() - 10
-            align = "center"
-        elif position == "bottom_right":
-            x = rect.right() - margin
-            y = rect.bottom() - margin  # 40
-            align = "right"
-        elif position == "center":
-            x = rect.center().x()
-            y = rect.center().y()
-            align = "center"
-        else:
+        self.annotations.set_image_size(self.image_width, self.image_height)
+        self.annotations.set_eraser_radius(10)
+
+        self.annotations.set_txt_font(font)
+
+    def mousePressEvent(self, event):
+        if not self.annotations.enabled:
             return
 
-        # Bottom positions render upward
-        reverse_vertical = position in ["bottom_left", "bottom_center", "bottom_right"]
+        point = self.widget_to_image_point(event.position().toPoint())
 
-        # Draw overlays
-        for key, context in overlays.items():
-            if not context.get("checked"):
-                continue
+        self.annotations.mousePressEvent(point)
 
-            typed = context.get("type", "text")
+        self.update()
 
-            # Draw image overlay
-            if typed == "image":
-                pixmap = context["value"]
-                scaled = pixmap.scaledToHeight(50, QtCore.Qt.SmoothTransformation)
-                draw_x = x
+    def mouseMoveEvent(self, event):
+        if not self.annotations.enabled:
+            return
 
-                # Horizontal alignment
-                if align == "center":
-                    draw_x -= scaled.width() / 2
-                elif align == "right":
-                    draw_x -= scaled.width()
+        if not (event.buttons() & QtCore.Qt.LeftButton):
+            return
 
-                # Vertical direction (TOP / BOTTOM DIRECTION)
-                if reverse_vertical:
-                    draw_y = y - scaled.height()
-                else:
-                    draw_y = y
+        point = self.widget_to_image_point(event.position().toPoint())
 
-                # Set overlay opacity
-                opacity = context.get("opacity", 1.0)
-                painter.setOpacity(opacity)
+        self.annotations.mouseMoveEvent(point)
 
-                # Draw image
-                path = painter.drawPixmap(int(draw_x), int(draw_y), scaled)
+        self.update()
 
-                # Reset Opacity
-                painter.setOpacity(1.0)
+    def mouseReleaseEvent(self, event):
 
-                # Vertical spacing offset
-                offset = scaled.height() + 10
+        if not self.annotations.enabled:
+            return
 
-                if reverse_vertical:
-                    y -= offset
-                else:
-                    y += offset
+        point = self.widget_to_image_point(event.position().toPoint())
 
-            # Draw text overlay
-            else:
-                # Dynamic overlay text
-                if key == "frame":
-                    text = f"Frame: {str(self.current_frame).zfill(constants.FRAME_PADDING)}"
+        self.annotations.mouseReleaseEvent(point)
 
-                elif key == "resolution":
-                    text = f"{self.image_width} x {self.image_height}"
-                else:
-                    text = (
-                        f"{context['label']}: {context['value']}"
-                        if context.get("label")
-                        else context["value"]
-                    )
+        self.update()
 
-                # Create font
-                font = Font(None, **context["font"])
-
-                # Calculate text bounds
-                path = QtGui.QPainterPath()
-                path.addText(0, 0, font, text)
-
-                bounds = path.boundingRect()
-                text_width = bounds.width()
-
-                draw_x = x
-
-                # Horizontal alignment
-                if align == "center":
-                    draw_x -= text_width / 2
-                elif align == "right":
-                    draw_x -= text_width
-
-                # Draw text
-                self.draw_overlay_text(painter, draw_x, y, text, context["font"])
-
-                # Vertical spacing
-                offset = spacing + context["font"].get("spacing", 0)
-
-                if reverse_vertical:
-                    y -= offset
-                else:
-                    y += offset
-
-    def draw_overlay_text(self, painter, x, y, text, font_data):
+    def widget_to_image_point(self, point):
         """
-        Draw overlay text.
+        Convert widget position to normalized image space.
+        """
 
-        Args:
-            painter (QtGui.QPainter):
-                Painter object.
+        rect = self.display_rect
 
-            x (float):
-                Draw X position.
+        x = (point.x() - rect.left()) / float(rect.width())
+        y = (point.y() - rect.top()) / float(rect.height())
 
-            y (float):
-                Draw Y position.
+        x = max(0.0, min(1.0, x))
+        y = max(0.0, min(1.0, y))
 
-            text (str):
-                Overlay text.
+        return (x, y)
 
-            font_data (dict):
-                Font configuration.
+    def image_to_widget_point(self, point):
+        """
+        Convert normalized image space to widget coordinates.
+        """
+
+        rect = self.display_rect
+
+        x = rect.left() + (point[0] * rect.width())
+        y = rect.top() + (point[1] * rect.height())
+
+        return QtCore.QPointF(x, y)
+
+    def undo_strokes(self):
+        """
+        Undo current frame annotation.
+        """
+
+        self.annotations.undo()
+
+        self.update()
+
+    def clear_strokes(self):
+        """
+        clear current frame annotation.
+        """
+
+        self.annotations.clear()
+
+        self.update()
+
+    def render_current_frame(self):
+        """
+        Render source frame with annotations.
 
         Returns:
-            QtGui.QPainterPath:
-                Generated text path.
+            QImage
         """
 
-        # Configure font
-        font = Font(None, **font_data)
-        painter.setFont(font)
+        if self.frame is None:
+            return None
 
-        # Text colors
-        fill_color = QtGui.QColor(*font_data.get("fillColor", (255, 255, 255)))
-        stroke_color = QtGui.QColor(*font_data.get("strokeColor", (0, 0, 0)))
+        frame = self.frame.copy()
 
-        stroke_width = font_data.get("stroke", 2)
+        height, width, channels = frame.shape
+        frame = numpy.ascontiguousarray(frame)
 
-        # Build text path
-        path = QtGui.QPainterPath()
-        path.addText(x, y, font, text)
+        if channels == 4:
+            image = QtGui.QImage(
+                frame.data, width, height, width * 4, QtGui.QImage.Format_RGBA8888
+            ).copy()
+        else:
+            image = QtGui.QImage(
+                frame.data,
+                width,
+                height,
+                width * 3,
+                QtGui.QImage.Format_RGB888,
+            ).copy()
 
-        # Draw text stroke
-        if stroke_width > 0:
-            pen = QtGui.QPen(stroke_color)
-            pen.setWidth(stroke_width)
-            painter.strokePath(path, pen)
+        painter = QtGui.QPainter(image)
 
-        # Set text opacity
-        opacity = font_data.get("opacity", 1.0)
-        painter.setOpacity(opacity)
+        self.annotations.set_frame(self.current_frame)
 
-        # Draw text fill
-        painter.fillPath(path, fill_color)
+        image_rect = QtCore.QRect(
+            0,
+            0,
+            width,
+            height,
+        )
 
-        return path
+        self.annotations.draw(
+            painter,
+            point_converter=lambda point: QtCore.QPointF(
+                point[0] * width,
+                point[1] * height,
+            ),
+            rect=image_rect,
+        )
+
+        painter.end()
+
+        return image
+
+    def save_frame(self, filepath):
+        image = self.render_current_frame()
+
+        if image:
+            image.save(filepath)
 
 
 if __name__ == "__main__":

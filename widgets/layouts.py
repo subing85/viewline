@@ -239,5 +239,15 @@ class VerticalSpacer(QtWidgets.QSpacerItem):
         )
 
 
+class HorizontalLineFrame(QtWidgets.QFrame):
+    def __init__(self, parent, *args, **kwargs):
+        super(HorizontalLineFrame, self).__init__(parent)
+        self.setLineWidth(1)
+        self.setMidLineWidth(0)
+        self.setFrameShape(QtWidgets.QFrame.HLine)
+        self.setFrameShadow(QtWidgets.QFrame.Sunken)
+        # self.setFrameShadow(QtWidgets.QFrame.Plain)
+
+
 if __name__ == "__main__":
     pass

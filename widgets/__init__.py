@@ -36,9 +36,22 @@ from playlist import Versions
 
 from widgets.pixmaps import PathPixmap
 
+from widgets.buttons import TxtButton
 from widgets.buttons import HelpButton
 from widgets.buttons import OpenButton
 from widgets.buttons import LoopButton
+from widgets.buttons import MoveButton
+from widgets.buttons import UndoButton
+from widgets.buttons import ColorButton
+from widgets.buttons import ClearButton
+from widgets.buttons import ArrowButton
+from widgets.buttons import PencilButton
+from widgets.buttons import PencilButton
+from widgets.buttons import EraserButton
+from widgets.buttons import RenderButton
+from widgets.buttons import EllipseButton
+from widgets.buttons import RectangleButton
+
 from widgets.buttons import ForwardButton
 from widgets.buttons import BackwordButton
 from widgets.buttons import PlayPauseButton
@@ -53,9 +66,16 @@ from widgets.layouts import HorizontalSpacer
 from widgets.layouts import HorizontalSplitter
 
 from widgets.styles import SetStylesheet
+from widgets.labels import ToolNameLabel
+from widgets.labels import ThicknesLabel
 from widgets.labels import CopyrightLabel
+from widgets.fontdialog import TxtInputDialog
+
+from widgets.lineedits import ThicknesSpinBox
+
 from widgets.pixmaps import NamePixmapIcon
 from widgets.dialogs import OpenMediaDialog
+from widgets.dialogs import FileDialog
 
 from widgets.playlist import PlaylistGroup
 
@@ -161,6 +181,76 @@ class MainWindow(QtWidgets.QMainWindow):
         self.horizontalspacer1 = HorizontalSpacer()
         self.horizontallayout_panel.addItem(self.horizontalspacer1)
 
+        # Annotation Drawing #####################################
+
+        self.toolNameLabel = ToolNameLabel(self)
+        self.horizontallayout_panel.addWidget(self.toolNameLabel)
+
+        # Pencil button
+        self.pencilButton = PencilButton(
+            self, tooltip="Pencil Tool", checkable=True, width=22, height=22
+        )
+        self.horizontallayout_panel.addWidget(self.pencilButton)
+
+        self.arrowButton = ArrowButton(
+            self, tooltip="Arrow Shape", checkable=True, width=22, height=22
+        )
+        self.arrowButton.setVisible(False)
+        self.horizontallayout_panel.addWidget(self.arrowButton)
+
+        self.ellipseButton = EllipseButton(
+            self, tooltip="Ellipse Shape", checkable=True, width=22, height=22
+        )
+        self.horizontallayout_panel.addWidget(self.ellipseButton)
+
+        self.rectangleButton = RectangleButton(
+            self, tooltip="Rectangle Shape", checkable=True, width=22, height=22
+        )
+        self.horizontallayout_panel.addWidget(self.rectangleButton)
+
+        self.eraserButton = EraserButton(
+            self, tooltip="Erasier Tool", checkable=True, width=22, height=22
+        )
+        self.eraserButton.setCheckable(True)
+        self.horizontallayout_panel.addWidget(self.eraserButton)
+
+        self.thicknesLabel = ThicknesLabel(self, "Thicknes")
+        self.horizontallayout_panel.addWidget(self.thicknesLabel)
+
+        self.thicknesSpinBox = ThicknesSpinBox(self, 3)
+        self.horizontallayout_panel.addWidget(self.thicknesSpinBox)
+
+        self.radiusSpinBox = ThicknesSpinBox(self, 10)
+        self.radiusSpinBox.setVisible(False)
+        self.horizontallayout_panel.addWidget(self.radiusSpinBox)
+
+        self.colorButton = ColorButton(self, tooltip="Pick Color", width=22, height=22)
+        self.horizontallayout_panel.addWidget(self.colorButton)
+
+        self.txtButton = TxtButton(self, tooltip="Text Tool", checkable=True, width=22, height=22)
+        self.horizontallayout_panel.addWidget(self.txtButton)
+
+        self.moveButton = MoveButton(self, tooltip="Move Tool", checkable=True, width=22, height=22)
+        self.horizontallayout_panel.addWidget(self.moveButton)
+
+        self.undoButton = UndoButton(self, tooltip="Undo", width=22, height=22)
+        self.horizontallayout_panel.addWidget(self.undoButton)
+
+        self.clearButton = ClearButton(self, tooltip="Clear", width=22, height=22)
+        self.horizontallayout_panel.addWidget(self.clearButton)
+
+        ########################################################
+
+        # Spacer
+        self.horizontalspacer2 = HorizontalSpacer()
+        self.horizontallayout_panel.addItem(self.horizontalspacer2)
+
+        self.renderButton = RenderButton(self, tooltip="Render Current Frame", width=22, height=22)
+        self.horizontallayout_panel.addWidget(self.renderButton)
+
+        self.horizontalspacer3 = HorizontalSpacer()
+        self.horizontallayout_panel.addItem(self.horizontalspacer3)
+
         # Display menu button
         self.displayMenuButton = DisplayMenuButton(
             self, tooltip="Water mark display menu", width=32, height=32
@@ -188,8 +278,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.horizontallayout_controller.addWidget(self.openButton)
 
         # Spacer
-        self.horizontalspacer2 = HorizontalSpacer()
-        self.horizontallayout_controller.addItem(self.horizontalspacer2)
+        self.horizontalspacer4 = HorizontalSpacer()
+        self.horizontallayout_controller.addItem(self.horizontalspacer4)
 
         # Previous frame button
         self.backwordButton = BackwordButton(
@@ -209,8 +299,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.horizontallayout_controller.addWidget(self.forwardButton)
 
         # Spacer
-        self.horizontalspacer3 = HorizontalSpacer()
-        self.horizontallayout_controller.addItem(self.horizontalspacer3)
+        self.horizontalspacer5 = HorizontalSpacer()
+        self.horizontallayout_controller.addItem(self.horizontalspacer5)
 
         # Loop toggle button
         self.loopButton = LoopButton(
@@ -243,6 +333,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.player.cache_changed.connect(self.timeline.set_cached_frames)
         self.timeline.frame_changed.connect(self.seek)
 
+        self.thicknesSpinBox.thicknes_changed.connect(self.viewer.annotations.set_thickness)
+        self.radiusSpinBox.thicknes_changed.connect(self.viewer.annotations.set_eraser_radius)
+        self.colorButton.color_changed.connect(self.viewer.annotations.set_color)
+
         self.backwordButton.clicked.connect(self.backword_frame)
         self.forwardButton.clicked.connect(self.forward_frame)
 
@@ -252,6 +346,25 @@ class MainWindow(QtWidgets.QMainWindow):
         self.viewer.set_overlay_options(self.displayMenuButton.menu.watermarks)
 
         self.helpButton.clicked.connect(self.help)
+
+        # self.pencilButton.toggled.connect(self.set_pencil_enabled)
+
+        self.pencilButton.toggled.connect(lambda enabled: self.set_draw_enabled("pencil", enabled))
+        self.arrowButton.toggled.connect(lambda enabled: self.set_draw_enabled("arrow", enabled))
+        self.ellipseButton.toggled.connect(
+            lambda enabled: self.set_draw_enabled("ellipse", enabled)
+        )
+        self.rectangleButton.toggled.connect(
+            lambda enabled: self.set_draw_enabled("rectangle", enabled)
+        )
+        self.eraserButton.toggled.connect(lambda enabled: self.set_draw_enabled("eraser", enabled))
+        self.txtButton.toggled.connect(lambda enabled: self.set_draw_enabled("txt", enabled))
+        self.moveButton.toggled.connect(lambda enabled: self.set_draw_enabled("move", enabled))
+
+        self.undoButton.clicked.connect(self.viewer.undo_strokes)
+        self.clearButton.clicked.connect(self.viewer.clear_strokes)
+
+        self.renderButton.clicked.connect(self.render)
 
         # Keyboard Shortcuts
 
@@ -491,6 +604,61 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Update player FPS
         self.player.set_fps(fps)
+
+    def set_draw_enabled(self, tool, enabled):
+        buttons = [
+            self.pencilButton,
+            self.arrowButton,
+            self.ellipseButton,
+            self.rectangleButton,
+            self.eraserButton,
+            self.txtButton,
+            self.moveButton,
+        ]
+
+        for button in buttons:
+            if button.name == button:
+                continue
+            button.setChecked(False)
+
+        self.toolNameLabel.setValue(enabled, tool)
+
+        if tool == "txt" and enabled:
+            txtInputDialog = TxtInputDialog(self)
+            txtInputDialog.value_changed.connect(self.viewer.set_sketch_enabled)
+            txtInputDialog.exec()
+            self.txtButton.setChecked(False)
+
+            return
+
+        if tool == "eraser":
+            self.thicknesSpinBox.setVisible(False)
+            self.radiusSpinBox.setVisible(True)
+            self.thicknesLabel.setValue("Radius")
+        else:
+            self.radiusSpinBox.setVisible(False)
+            self.thicknesSpinBox.setVisible(True)
+            self.thicknesLabel.setValue("Thicknes")
+
+        self.viewer.set_sketch_enabled(tool, enabled, None)
+
+    def render(self):
+        if not self.viewer.current_frame:
+            return
+
+        fileDialog = FileDialog(
+            self,
+            "Browse your Save directory",
+            label="Image",
+            extensions=["png", "jpg"],
+            browsepath=None,
+        )
+        filename = f"frame.{self.viewer.current_frame:04d}"
+
+        filepath = fileDialog.savefile(filename)
+
+        if filepath:
+            self.viewer.save_frame(filepath)
 
     def help(self):
         """
