@@ -126,7 +126,9 @@ Notes:
 
 from __future__ import absolute_import
 
+import utils
 import numpy
+import logger
 
 import resources
 import constants
@@ -174,6 +176,8 @@ from widgets.buttons import BackwordButton
 from widgets.buttons import PlayPauseButton
 
 from widgets.timeline import TimelineWidget
+
+LOGGER = logger.getLogger(__name__)
 
 
 class ViewFrame(QtWidgets.QFrame):
@@ -1103,6 +1107,8 @@ class ViewerWidget(QtOpenGLWidgets.QOpenGLWidget):
         - Opacity control
     """
 
+    render_finished = QtCore.Signal(str)
+
     def __init__(self, parent=None):
         """
         Initialize viewer widget.
@@ -1476,11 +1482,21 @@ class ViewerWidget(QtOpenGLWidgets.QOpenGLWidget):
 
         return image
 
-    def save_frame(self, filepath):
+    def save_frame(self, filepath, post_process=False):
         image = self.render_current_frame()
 
         if image:
+            utils.makedirs(filepath)
             image.save(filepath)
+            LOGGER.info(f"Succeed, render to {filepath}")
+
+            if post_process:
+                self.render_finished.emit(filepath)
+        else:
+            LOGGER.error(f"Failure render to {filepath}")
+
+            if post_process:
+                self.render_finished.emit(None)
 
 
 if __name__ == "__main__":

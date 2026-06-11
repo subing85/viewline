@@ -50,7 +50,9 @@ import re
 import glob
 import base64
 import urllib
+import datetime
 import requests
+import tempfile
 import webbrowser
 
 import resources
@@ -417,6 +419,41 @@ def overrideWatermarkValues(version, watermarks=None, **kwargs):
             overlay["value"] = value
 
     return watermarks
+
+
+def getTempDate(context=None):
+    now = context if context else datetime.datetime.now()
+    date_time = now.strftime("%Y-%B-%d-%A-%I-%M-%S-%p")
+    return date_time
+
+
+def tempdir(subfolder=False):
+    directory = pathResolver(tempfile.gettempdir())
+
+    if subfolder:
+        directory = pathResolver(directory, folders=[getTempDate()])
+
+    return directory
+
+
+def hasFile(filepath):
+    dirname, extenstion = os.path.splitext(filepath)
+    return True if extenstion else False
+
+
+def makedirs(path, open=False):
+    if not path:
+        return
+
+    abspath = os.path.expandvars(path)
+    if hasFile(abspath):
+        abspath = os.path.dirname(abspath)
+
+    if not os.path.isdir(abspath):
+        os.makedirs(abspath, exist_ok=True)
+
+    if open:
+        openPath(abspath)
 
 
 if __name__ == "__main__":

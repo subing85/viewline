@@ -298,6 +298,8 @@ class InputWidget(QtWidgets.QFrame):
         >>> widget.set_version_context(version)
     """
 
+    trigger_snapshot = QtCore.Signal(str)
+
     def __init__(self, parent, *args, **kwargs):
         """
         Initialize review submission widget.
@@ -417,6 +419,7 @@ class InputWidget(QtWidgets.QFrame):
         # Signal Connections
         # --------------------------------------------------
         self.attachButton.clicked.connect(self.setAttachment)
+        self.snapshotButton.clicked.connect(self.snapshot)
         self.submitButton.clicked.connect(self.submit)
 
     def trigger_attachment(self, filepath):
@@ -496,6 +499,8 @@ class InputWidget(QtWidgets.QFrame):
         # Add row to attachment layout
         self.attachmentlayout.addLayout(attachmentWidget)
 
+        return attachmentWidget
+
     def getAttachments(self):
         """
         Collect attachment file paths.
@@ -513,6 +518,14 @@ class InputWidget(QtWidgets.QFrame):
             if child and child.filepath:
                 attachments.append(child.filepath)
         return attachments
+
+    def snapshot_attachment(self, filepath):
+        attachmentWidget = self.addAttachment()
+        attachmentWidget.attachment(filepath)
+
+    def snapshot(self):
+        directory = utils.tempdir(subfolder=True)
+        self.trigger_snapshot.emit(directory)
 
     def submit(self):
         """
@@ -549,6 +562,9 @@ class InputWidget(QtWidgets.QFrame):
             "version": self.context,
         }
 
+        from pprint import pprint
+
+        pprint(context)
         # ----------------------------------
         # Create here your submit signal
         # ----------------------------------
@@ -618,7 +634,7 @@ class AttachmentWidget(HorizontalLayout):
 
         # Signal connections
         self.removeButton.clicked.connect(self.remove)
-        self.attachemntButton.clicked.connect(self.addAttachment)
+        self.attachemntButton.clicked.connect(self.attachment)
 
     def remove(self):
         """
@@ -639,7 +655,7 @@ class AttachmentWidget(HorizontalLayout):
         # Remove layout
         self.deleteLater()
 
-    def addAttachment(self):
+    def attachment(self, filepath=None):
         """
         Browse and select an attachment file.
 
@@ -658,17 +674,20 @@ class AttachmentWidget(HorizontalLayout):
             None
         """
 
-        # Create file browser dialog
-        fileDialog = FileDialog(
-            self.parentWidget(),
-            "Browse your attachment file",
-            label="image",
-            extensions=["png", "jpg"],
-            browsepath=self.parentWidget().browsepath,
-        )
+        if filepath:
+            self.filepath = filepath
+        else:
+            # Create file browser dialog
+            fileDialog = FileDialog(
+                self.parentWidget(),
+                "Browse your attachment file",
+                label="image",
+                extensions=["png", "jpg"],
+                browsepath=self.parentWidget().browsepath,
+            )
 
-        # Select file
-        self.filepath = fileDialog.pickFile()
+            # Select file
+            self.filepath = fileDialog.pickFile()
 
         # User cancelled dialog
         if not self.filepath:
