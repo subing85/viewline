@@ -195,6 +195,13 @@ class MainWindow(QtWidgets.QMainWindow):
             self.recapsWidget.set_current_recaps
         )
 
+        self.recapsWidget.inputWidget.trigger_snapshot.connect(self.render_snapshot)
+        self.viewframe.viewer.render_finished.connect(
+            self.recapsWidget.inputWidget.snapshot_attachment
+        )
+
+        # self.recapsWidget.inputWidget.trigger_snapshot.connect(self.render_snapshot)
+
         # --------------------------------------------------------------------
         # Viewer Timeline Toolbar Layout Signal Connections
         # --------------------------------------------------------------------
@@ -415,7 +422,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.player.set_loop(enabled)
 
     def set_draw_enabled(self, tool, enabled, font):
-
         self.viewframe.viewer.set_sketch_enabled(tool, enabled, font)
 
     def render(self):
@@ -434,7 +440,16 @@ class MainWindow(QtWidgets.QMainWindow):
         filepath = fileDialog.savefile(filename)
 
         if filepath:
-            self.viewframe.viewer.save_frame(filepath)
+            self.viewframe.viewer.save_frame(filepath, post_process=False)
+
+    def render_snapshot(self, directory, extension="png"):
+        if not self.viewframe.viewer.current_frame:
+            return
+
+        filename = f"frame.{self.viewframe.viewer.current_frame:04d}.{extension}"
+        filepath = utils.pathResolver(directory, filename=filename)
+
+        self.viewframe.viewer.save_frame(filepath, post_process=True)
 
     def update_fps(self, context):
         """
