@@ -27,12 +27,12 @@
             "type": "ApiUser"
         },
         "image": "D:/works/developments/render/samples/sample.png",
-        "media": "D:/works/developments/render/samples/render-png/samples.####.png"
+        "media": "D:/works/developments/render/samples/render/sample.####.exr"
     },
     {
         "type": "Version",
         "id": 2998,
-        "code": "sample Normal",
+        "code": "shot-info-101",
         "project": {
             "id": 358,
             "name": "Super Chase",
@@ -56,13 +56,13 @@
             "name": "workspace 0.0.1",
             "type": "ApiUser"
         },
-        "image": "D:/works/developments/render/samples/sample.png",
-        "media": "D:/works/developments/render/samples/render-1/sample.####.exr"
+        "image": "D:/works/developments/render/shot-101/shot-101-Acting-11.png",
+        "media": "D:/works/developments/render/shot-101/shot-101-Acting-11.mp4"
     },
     {
         "type": "Version",
         "id": 2999,
-        "code": "sample OCIO",
+        "code": "shot-song-101",
         "project": {
             "id": 358,
             "name": "Super Chase",
@@ -86,8 +86,8 @@
             "name": "workspace 0.0.1",
             "type": "ApiUser"
         },
-        "image": "D:/works/developments/render/samples/sample.png",
-        "media": "D:/works/developments/render/samples/render/sample.####.exr"
+        "image": "D:/works/developments/render/shot-101/shot-101-Acting-22.png",
+        "media": "D:/works/developments/render/shot-101/shot-101-Acting-22.mp4"
     },
     {
         "type": "Version",

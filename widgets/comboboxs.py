@@ -415,7 +415,7 @@ class NormalCombobox(QtWidgets.QComboBox):
 
         if self.values:
             self.setItems(values=self.values)
-    
+
     def setItems(self, values=None):
         self.values = values or self.values
 
@@ -433,8 +433,6 @@ class NormalCombobox(QtWidgets.QComboBox):
 
         value = None if self.values[index] == "null" else self.values[index]
         return value
-
-
 
 
 if __name__ == "__main__":

@@ -94,9 +94,11 @@ class TimelineWidget(QtWidgets.QWidget):
 
         # Timeline settings
         self.timeline_margin = 50
-        self.start_frame = constants.RP_START_FRAME
-        self.end_frame = constants.RP_START_FRAME + constants.RP_DEFAULT_FRAMES
-        self.current_frame = constants.RP_START_FRAME
+        self.start_frame = constants.VL_START_FRAME
+        self.end_frame = constants.VL_START_FRAME + constants.VL_DEFAULT_FRAMES
+        self.current_frame = constants.VL_START_FRAME
+
+        print("\nself.current_frame", self.current_frame, "\n")
 
         # Cached frame storage
         self.cached_frames = set()

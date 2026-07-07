@@ -116,7 +116,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Configure main window size and title
         self.resize(*constants.WINDOW_SIZE)
-        self.setWindowTitle(f"{constants.RP_TOOL_NAME}-{constants.RP_VERSION}")
+        self.setWindowTitle(f"{constants.VL_TOOL_NAME}-{constants.VL_VERSION}")
 
         # Create central widget
         self.centralwidget = QtWidgets.QWidget(self)
@@ -169,6 +169,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.player.frame_changed.connect(self.viewframe.timeline.set_current_frame)
         self.player.frame_changed.connect(self.viewframe.viewer.set_current_frame)
         self.player.cache_changed.connect(self.viewframe.timeline.set_cached_frames)
+
         self.viewframe.timeline.frame_changed.connect(self.seek)
 
         self.player.timeline_actived.connect(
@@ -183,7 +184,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ocio_widget.ocio_changed.connect(self.player.set_ocio)
 
         ########################################################################
-
 
         self.viewframe.viewToolbarLayout.aov_changed.connect(self.player.set_aov)
 
@@ -227,7 +227,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.themeButton.clicked.connect(self.change_theme)
         self.helpButton.clicked.connect(self.help)
 
-
         # Keyboard Shortcuts
         # Play / Pause
         self.playShortcut = QtGui.QShortcut(QtGui.QKeySequence("Space"), self)
@@ -268,7 +267,7 @@ class MainWindow(QtWidgets.QMainWindow):
         Setup the main window icon.
         """
 
-        pixmap = NamePixmapIcon(constants.RP_TOOL_ICON)
+        pixmap = NamePixmapIcon(constants.VL_TOOL_ICON)
         self.setWindowIcon(pixmap)
 
     def set_current_project(self, project):
@@ -351,9 +350,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Update timeline range
         self.viewframe.timeline.set_range(
-            constants.RP_START_FRAME, constants.RP_START_FRAME + (self.player.frame_count - 1)
+            constants.VL_START_FRAME, constants.VL_START_FRAME + (self.player.frame_count - 1)
         )
-    
+
     def call_ocio(self, *args):
         SetStylesheet(self.ocio_widget, theme=self.current_theme)
         self.ocio_widget.show()
@@ -378,6 +377,7 @@ class MainWindow(QtWidgets.QMainWindow):
         Seek playback to timeline frame.
         """
 
+        # if self.player.reader.media_type == "sequence":
         self.player.seek(self.viewframe.timeline.current_frame)
 
         # Sync FPS display
@@ -486,7 +486,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Update player FPS
         self.player.set_fps(fps)
-    
+
     def change_theme(self):
         index = (constants.GUI_THEMES.index(self.current_theme) + 1) % len(constants.GUI_THEMES)
         self.current_theme = constants.GUI_THEMES[index]
