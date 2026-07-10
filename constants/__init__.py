@@ -26,13 +26,13 @@ Attributes:
     STUDIO_NAME (str):
         Studio/company identifier.
 
-    RP_TOOL_NAME (str):
+    VL_TOOL_NAME (str):
         Application display name.
 
-    RP_TOOL_ICON (str):
+    VL_TOOL_ICON (str):
         Default application icon resource name.
 
-    RP_VERSION (str):
+    VL_VERSION (str):
         Current application version.
 
     WINDOW_SIZE (list[int]):
@@ -88,7 +88,7 @@ Attributes:
 
 Example:
     >>> import constants
-    >>> print(constants.RP_TOOL_NAME)
+    >>> print(constants.VL_TOOL_NAME)
     MC - Review Player
 
     >>> fps = constants.DEFULT_FPS["value"]
@@ -109,11 +109,11 @@ from __future__ import absolute_import
 
 STUDIO_NAME = "motion-craft"
 
-RP_TOOL_NAME = "MC - Review Player"
+VL_TOOL_NAME = "MC - Review Player"
 
-RP_TOOL_ICON = "mc-review-player"
+VL_TOOL_ICON = "mc-review-player"
 
-RP_VERSION = "0.0.1-beta.1"
+VL_VERSION = "0.0.1-beta.1"
 
 WINDOW_SIZE = [1400, 800]
 
@@ -143,12 +143,12 @@ FPS_VALUES = [
 
 DEFULT_FPS = FPS_VALUES[1]
 
-RP_START_FRAME = 101
-RP_DEFAULT_FRAMES = 100 - 1
-RP_FRAME_PADDING = 4
-RP_FRAME_CACHE_MAX_SIZE = 200
+VL_START_FRAME = 1
+VL_DEFAULT_FRAMES = VL_START_FRAME + 100
+VL_FRAME_PADDING = 4
+VL_FRAME_CACHE_MAX_SIZE = 200
 
-RP_THUMBNAIL_SIZE = [200, 112]
+VL_THUMBNAIL_SIZE = [200, 112]
 
 DATE_TIME_FORMAT = "%Y-%m-%d %I:%M:%S:%p"
 

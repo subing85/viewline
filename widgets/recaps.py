@@ -356,8 +356,8 @@ class ReviewOutFrame(QtWidgets.QFrame):
                 self.imageViewLabel = ImageViewLabel(
                     self,
                     thumbnail,
-                    width=constants.RP_THUMBNAIL_SIZE[0],
-                    height=constants.RP_THUMBNAIL_SIZE[1],
+                    width=constants.VL_THUMBNAIL_SIZE[0],
+                    height=constants.VL_THUMBNAIL_SIZE[1],
                 )
                 self.mainlayout.addWidget(self.imageViewLabel)
                 self.imageViewLabel.clicked.connect(self.openThumbnail)

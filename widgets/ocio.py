@@ -197,7 +197,6 @@ class OcioWidget(QtWidgets.QWidget):
         # Build the complete graphical interface.
         self.setupUi()
 
-
     def setupUi(self):
         """
         Build and initialize the main user interface.
@@ -218,7 +217,7 @@ class OcioWidget(QtWidgets.QWidget):
         # Apply a styled panel appearance and frame shadow.
         self.frame.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.frame.setFrameShadow(QtWidgets.QFrame.Raised)
-        
+
         self.mainlayout.addWidget(self.frame)
 
         # Create frame layout
@@ -259,7 +258,7 @@ class OcioWidget(QtWidgets.QWidget):
         # Create the color space combobox.
         self.colorSpaceCombobox = NormalCombobox(self)
         self.gridlayout.addWidget(self.colorSpaceCombobox, 0, 1, 1, 1)
-    
+
         # ----- Display ----------
 
         # Create the display label.
@@ -377,7 +376,7 @@ class OcioWidget(QtWidgets.QWidget):
         """
         Browse and load an OpenColorIO configuration file.
 
-        Opens a file browser allowing the user to select an OpenColorIO (*.ocio) configuration file. Once selected, 
+        Opens a file browser allowing the user to select an OpenColorIO (*.ocio) configuration file. Once selected,
         the configuration path is stored and the OCIO processor is reloaded using the new configuration.
 
         Responsibilities:
@@ -478,7 +477,7 @@ class OcioWidget(QtWidgets.QWidget):
             >>> self.reload_config()
         """
 
-        # Create a new OCIO processor using the currently selected configuration file.    #         
+        # Create a new OCIO processor using the currently selected configuration file.    #
         self.ocio_processor = OCIOProcessor(self.config_path)
 
         # Query all available input color spaces from the loaded OCIO configuration.
@@ -536,12 +535,12 @@ class OcioWidget(QtWidgets.QWidget):
 
         # Populate the View combobox with the available display views.
         self.viewCombobox.setItems(views)
-    
+
     def display_index_changed(self, *args):
         """
         Handle display selection changes.
 
-        This slot is invoked whenever the selected display changes. 
+        This slot is invoked whenever the selected display changes.
         It refreshes the View combobox to show only the views that belong to the newly selected display.
 
         Responsibilities:
@@ -587,7 +586,7 @@ class OcioWidget(QtWidgets.QWidget):
 
         # Refresh the available views for the newly selected display.
         self.set_views()
-    
+
     def set_config(self):
         """
         Apply the selected OpenColorIO configuration.

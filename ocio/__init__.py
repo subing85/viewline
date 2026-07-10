@@ -484,7 +484,7 @@ class OCIOProcessor(object):
             self.config = PyOpenColorIO.Config.CreateFromFile(config_path)
         else:
             self.config = PyOpenColorIO.GetCurrentConfig()
-    
+
     def set_enabled(self, enabled):
         self.enabled = enabled
 
@@ -608,7 +608,6 @@ class OCIOProcessor(object):
 
         return image
 
-
     def set_display_transform(self, input_space, display, view):
         """
         Build and cache the OCIO display transform processor.
@@ -669,7 +668,7 @@ class OCIOProcessor(object):
 
         # Specify the destination display device.
         transform.setDisplay(display)
-        
+
         # Specify the display view (tone mapping / look).
         transform.setView(view)
 
