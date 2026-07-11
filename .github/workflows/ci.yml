@@ -1,4 +1,4 @@
-name: Deploy MkDocs site to GitHub Pages
+name: Deploy Viewline Doc site to GitHub Pages
 
 on:
   push:
@@ -11,10 +11,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6  # Upgraded to v6 for Node.js 24 support
+        uses: actions/checkout@v6
 
       - name: Set up Python
-        uses: actions/setup-python@v6  # Upgraded to v6 for Node.js 24 support
+        uses: actions/setup-python@v6
         with:
           python-version: '3.x'
 
@@ -24,7 +24,7 @@ jobs:
 
       - name: Build MkDocs site
         run: |
-          mkdocs build
+          mkdocs build -f doc/mkdocs.yml
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -32,7 +32,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./site
+          path: ./doc/site
 
   deploy:
     if: github.ref == 'refs/heads/main'
