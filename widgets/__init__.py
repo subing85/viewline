@@ -193,7 +193,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         ########################################################################
 
-        # self.viewframe.viewToolbarLayout.aov_changed.connect(self.player.set_aov)
+        self.viewframe.viewToolbarLayout.aov_changed.connect(self.player.set_aov)
 
         self.viewframe.viewToolbarLayout.thicknes_changed.connect(
             self.viewframe.viewer.annotations.set_thickness

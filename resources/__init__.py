@@ -131,3 +131,7 @@ def readJsonFile(filepath):
         # Parse JSON Content
         content = json.load(target)
         return content
+
+
+if __name__ == "__main__":
+    pass
