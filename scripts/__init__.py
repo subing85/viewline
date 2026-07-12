@@ -105,8 +105,13 @@ class Projects(object):
         projects_data_list = utils.readJsonFile(projects_file)
 
         if not projects_data_list:
-            projects_data_list = resources.getPreset("projects")
+            projects_data_list = utils.redirectPreset("projects", reviews_path)
             utils.writeJsonFile(projects_data_list, projects_file, indent=4)
+
+        for projects_data in projects_data_list:
+            projects_data["image"] = utils.pathResolver(
+                reviews_path, filename=projects_data["image"]
+            )
 
         # Sort Versions By Creation Date
         result = sorted(projects_data_list, key=lambda k: (k["created_at"]), reverse=True)
@@ -165,8 +170,18 @@ class Versions(object):
         versions_data_list = utils.readJsonFile(versions_file)
 
         if not versions_data_list:
-            versions_data_list = resources.getPreset("versions")
+            versions_data_list = utils.redirectPreset("versions", reviews_path)
+
             utils.writeJsonFile(versions_data_list, versions_file, indent=4)
+
+        for versions_data in versions_data_list:
+            versions_data["image"] = utils.pathResolver(
+                reviews_path, filename=versions_data["image"]
+            )
+
+            versions_data["media"] = utils.pathResolver(
+                reviews_path, filename=versions_data["media"]
+            )
 
         # Filter Versions By Project
         versions_data = list(

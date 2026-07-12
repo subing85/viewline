@@ -194,26 +194,6 @@ def dirname(path):
     return os.path.dirname(path)
 
 
-def _basename(path):
-    """Return basename from path.
-
-    Args:
-        path (str):
-            File path.
-
-    Returns:
-        str:
-            File name.
-
-    Example:
-        >>> basename("/tmp/test.exr")
-        'test.exr'
-    """
-
-    # Extract Basename
-    return os.path.basename(path)
-
-
 def pathResolver(path, folders=list(), filename=None):
     """Build path from folders and filename.
 
@@ -572,6 +552,51 @@ def copyFile(source, destination, delete=False):
     copiedFile = shutil.copy2(source, destination)
 
     return pathResolver(copiedFile)
+
+
+def redirectPreset(preset, traget):
+    context_list = resources.getPreset(preset)
+
+    for context in context_list:
+
+        if context.get("image"):
+            numid = numericId()
+            extension = fileExtension(context["image"])
+
+            folder = dirname(context["image"])
+
+            source = pathResolver(resources.CURRENT_PATH, filename=context["image"])
+            destination = pathResolver(traget, folders=[folder], filename=f"{numid}.{extension}")
+
+            context["image"] = f"{folder}/{numid}.{extension}"
+
+            copyFile(source, destination)
+        
+        if context.get("media"):
+            filepath = pathResolver(resources.CURRENT_PATH, filename=context["media"])
+
+            files = getSequence(filepath)
+            numid = numericId()
+
+            for file in files:
+                folder = dirname(context["media"])
+                filename = fileName(context["media"])
+                extension = fileExtension(context["media"])
+
+                filenames = filename.rsplit(".", 1)
+
+                if len(filenames) > 1:
+                    new_filename = f"{numid}.{filenames[1]}.{extension}"
+                else:
+                    new_filename = f"{numid}.{extension}"
+
+                context["media"] = f"{folder}/{numid}.{extension}"
+
+                destination = pathResolver(traget, folders=[folder], filename=new_filename)
+
+                copyFile(file, destination)
+    
+    return context_list
 
 
 if __name__ == "__main__":
