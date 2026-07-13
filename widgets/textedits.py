@@ -93,7 +93,7 @@ class ReviewTextEdit(QtWidgets.QTextEdit):
 
         self.setStyleSheet("QTextEdit {border: none;}")
 
-        # Fixed-height vertical sizing policy
+        # Fixed-height vertical sizing policyexit
         sizepolicy = QtWidgets.QSizePolicy(
             QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed
         )
