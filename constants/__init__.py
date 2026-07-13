@@ -205,4 +205,6 @@ VIEWER_SAMPLES_RATE = 8
 
 COPYRIGHT_LABEL = "Support, Subin. Gopi (subing85@gmail.com)."
 
-WEBLINK = "https://github.com/subing85/review_player"
+WEBLINK = "https://github.com/subing85/review_player/"
+
+WEBL_DOC_INK = "https://subing85.github.io/viewline/"
