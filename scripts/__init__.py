@@ -47,8 +47,7 @@ Notes:
 
 from __future__ import absolute_import
 
-import utils
-import resources
+from viewline import utils
 
 
 class Projects(object):

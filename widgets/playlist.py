@@ -95,14 +95,14 @@ from __future__ import absolute_import
 from PySide6 import QtCore
 from PySide6 import QtWidgets
 
-from widgets.styles import WaitCursor
-from widgets.labels import ProjectIconLabel
+from viewline.widgets.styles import WaitCursor
+from viewline.widgets.labels import ProjectIconLabel
 
-from widgets.layouts import VerticalLayout
-from widgets.layouts import HorizontalLayout
+from viewline.widgets.layouts import VerticalLayout
+from viewline.widgets.layouts import HorizontalLayout
 
-from widgets.comboboxs import ProjectCombobox
-from widgets.treewidgets import PlaylistTreewidget
+from viewline.widgets.comboboxs import ProjectCombobox
+from viewline.widgets.treewidgets import PlaylistTreewidget
 
 
 class PlaylistWidget(QtWidgets.QWidget):

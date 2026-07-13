@@ -108,13 +108,13 @@ from __future__ import absolute_import
 import copy
 import uuid
 
-import constants
-
 from PySide6 import QtGui
 from PySide6 import QtCore
 
-from widgets.styles import Font
-from widgets.styles import StrokePen
+from viewline import constants
+
+from viewline.widgets.styles import Font
+from viewline.widgets.styles import StrokePen
 
 
 class Sketch(object):

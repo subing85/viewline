@@ -47,13 +47,13 @@ from __future__ import absolute_import
 
 import re
 
-import utils
-import constants
-
 from PySide6 import QtCore
 from PySide6 import QtWidgets
 
-from widgets.styles import SetStylesheet
+from viewline import utils
+from viewline import constants
+
+from viewline.widgets.styles import SetStylesheet
 
 
 class SequenceDisplayDelegate(QtWidgets.QStyledItemDelegate):

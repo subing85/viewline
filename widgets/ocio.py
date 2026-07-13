@@ -49,24 +49,24 @@ Example:
 
 from __future__ import absolute_import
 
-import utils
-
 from PySide6 import QtCore
 from PySide6 import QtWidgets
 
-from widgets.labels import RightLabel
-from widgets.buttons import TextButton
-from widgets.dialogs import FileDialog
-from widgets.lineedits import InputLineEdit
+from viewline import utils
 
-from widgets.layouts import GridLayout
-from widgets.layouts import VerticalLayout
-from widgets.layouts import HorizontalSpacer
-from widgets.layouts import HorizontalLayout
+from viewline.widgets.labels import RightLabel
+from viewline.widgets.buttons import TextButton
+from viewline.widgets.dialogs import FileDialog
+from viewline.widgets.lineedits import InputLineEdit
 
-from widgets.comboboxs import NormalCombobox
+from viewline.widgets.layouts import GridLayout
+from viewline.widgets.layouts import VerticalLayout
+from viewline.widgets.layouts import HorizontalSpacer
+from viewline.widgets.layouts import HorizontalLayout
 
-from ocio import OCIOProcessor
+from viewline.widgets.comboboxs import NormalCombobox
+
+from viewline.ocio import OCIOProcessor
 
 
 class OcioWidget(QtWidgets.QWidget):

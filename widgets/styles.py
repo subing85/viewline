@@ -51,11 +51,11 @@ from __future__ import absolute_import
 
 import qdarktheme
 
-import constants
-
 from PySide6 import QtGui
 from PySide6 import QtCore
 from PySide6 import QtWidgets
+
+from viewline import constants
 
 
 class SetStylesheet(object):

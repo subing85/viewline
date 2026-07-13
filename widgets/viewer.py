@@ -130,7 +130,6 @@ import utils
 import numpy
 import logger
 
-import constants
 
 from OpenGL import GL
 
@@ -139,44 +138,46 @@ from PySide6 import QtCore
 from PySide6 import QtWidgets
 from PySide6 import QtOpenGLWidgets
 
-from widgets.annotations import Sketch
+from viewline import constants
 
-from widgets.buttons import TxtButton
-from widgets.buttons import OpenButton
-from widgets.buttons import LoopButton
-from widgets.buttons import MoveButton
-from widgets.buttons import UndoButton
-from widgets.buttons import OcioButton
-from widgets.buttons import ColorButton
-from widgets.buttons import ClearButton
-from widgets.buttons import ArrowButton
-from widgets.buttons import PencilButton
-from widgets.buttons import EraserButton
-from widgets.buttons import RenderButton
-from widgets.buttons import RecapsButton
-from widgets.buttons import ForwardButton
-from widgets.buttons import EllipseButton
-from widgets.buttons import BackwardButton
-from widgets.buttons import RectangleButton
-from widgets.buttons import PlayPauseButton
-from widgets.buttons import WatermarkMenuButton
+from viewline.widgets.annotations import Sketch
 
-from widgets.sliders import VolumeSlider
+from viewline.widgets.buttons import TxtButton
+from viewline.widgets.buttons import OpenButton
+from viewline.widgets.buttons import LoopButton
+from viewline.widgets.buttons import MoveButton
+from viewline.widgets.buttons import UndoButton
+from viewline.widgets.buttons import OcioButton
+from viewline.widgets.buttons import ColorButton
+from viewline.widgets.buttons import ClearButton
+from viewline.widgets.buttons import ArrowButton
+from viewline.widgets.buttons import PencilButton
+from viewline.widgets.buttons import EraserButton
+from viewline.widgets.buttons import RenderButton
+from viewline.widgets.buttons import RecapsButton
+from viewline.widgets.buttons import ForwardButton
+from viewline.widgets.buttons import EllipseButton
+from viewline.widgets.buttons import BackwardButton
+from viewline.widgets.buttons import RectangleButton
+from viewline.widgets.buttons import PlayPauseButton
+from viewline.widgets.buttons import WatermarkMenuButton
 
-from widgets.labels import ThicknesLabel
-from widgets.labels import ToolNameLabel
+from viewline.widgets.sliders import VolumeSlider
 
-from widgets.comboboxs import FbsCombobox
-from widgets.comboboxs import AovsCombobox
+from viewline.widgets.labels import ThicknesLabel
+from viewline.widgets.labels import ToolNameLabel
 
-from widgets.timeline import TimelineWidget
+from viewline.widgets.comboboxs import FbsCombobox
+from viewline.widgets.comboboxs import AovsCombobox
 
-from widgets.layouts import VerticalLayout
-from widgets.layouts import HorizontalLayout
-from widgets.layouts import HorizontalSpacer
+from viewline.widgets.timeline import TimelineWidget
 
-from widgets.lineedits import ThicknesSpinBox
-from widgets.fontdialog import TxtInputDialog
+from viewline.widgets.layouts import VerticalLayout
+from viewline.widgets.layouts import HorizontalLayout
+from viewline.widgets.layouts import HorizontalSpacer
+
+from viewline.widgets.lineedits import ThicknesSpinBox
+from viewline.widgets.fontdialog import TxtInputDialog
 
 LOGGER = logger.getLogger(__name__)
 

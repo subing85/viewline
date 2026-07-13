@@ -63,17 +63,17 @@ from PySide6 import QtGui
 from PySide6 import QtCore
 from PySide6 import QtWidgets
 
-from widgets.buttons import TextButton
-from widgets.buttons import ColorButton
-from widgets.buttons import TextToolButton
+from viewline.widgets.buttons import TextButton
+from viewline.widgets.buttons import ColorButton
+from viewline.widgets.buttons import TextToolButton
 
-from widgets.labels import CopyrightLabel
+from viewline.widgets.labels import CopyrightLabel
 
-from widgets.layouts import VerticalLayout
-from widgets.layouts import HorizontalSpacer
-from widgets.layouts import HorizontalLayout
+from viewline.widgets.layouts import VerticalLayout
+from viewline.widgets.layouts import HorizontalSpacer
+from viewline.widgets.layouts import HorizontalLayout
 
-from widgets.lineedits import FontSizeSpinBox
+from viewline.widgets.lineedits import FontSizeSpinBox
 
 
 class TxtInputDialog(QtWidgets.QDialog):

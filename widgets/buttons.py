@@ -50,9 +50,9 @@ from PySide6 import QtGui
 from PySide6 import QtCore
 from PySide6 import QtWidgets
 
-from widgets.menus import WatermarkMenus
-from widgets.dialogs import ColorDialog
-from widgets.pixmaps import NamePixmapIcon
+from viewline.widgets.menus import WatermarkMenus
+from viewline.widgets.dialogs import ColorDialog
+from viewline.widgets.pixmaps import NamePixmapIcon
 
 
 class IconButton(QtWidgets.QPushButton):

@@ -38,8 +38,8 @@ import av
 import numpy
 import OpenImageIO
 
-import utils
-import constants
+from viewline import utils
+from viewline import constants
 
 
 class MovieReader(object):
@@ -352,9 +352,35 @@ class MovieReader(object):
 
         return 0
 
+<<<<<<< Updated upstream
     def has_audio(self):
         """
         Return whether the movie contains an audio stream.
+=======
+                # A single packet may decode into one or more frames.
+                for frame in packet.decode():
+
+                    # Increment the decoded video frame counter.
+                    # self.video_frame_index += 1
+
+                    # Return the decoded video frame.
+                    return ("video", frame)
+
+            # Decode audio packets.
+            elif self.audio_stream and packet.stream == self.audio_stream:
+
+                # A single packet may decode into one or more audio frames.
+                for frame in packet.decode():
+
+                    # Increment the decoded audio frame counter.
+                    # self.audio_frame_index += 1
+
+                    # Return the decoded audio frame.
+                    return ("audio", frame)
+
+    def get_frame(self, *args, **kwrags):
+        """Decode next sequential video frame.
+>>>>>>> Stashed changes
 
         Returns:
             bool
@@ -375,6 +401,58 @@ class MovieReader(object):
 
         return list()
 
+<<<<<<< Updated upstream
+=======
+    def seek(self, frame):
+        """
+        Seek the movie to the specified timeline frame.
+
+        This method converts the requested timeline frame into a presentation
+        timestamp, seeks the media container, recreates the packet generator,
+        and resets the internal frame counters.
+
+        Args:
+            frame (int):
+                Timeline frame to seek to.
+
+        Returns:
+            None
+        """
+
+        # Convert timeline frame to zero-based frame index.
+        frame_index = frame - constants.VL_START_FRAME
+
+        # Clamp the frame index.
+        frame_index = max(0, min(frame_index, self.frame_count() - 1))
+
+        # Convert frame index to timestamp (seconds).
+        seconds = frame_index / self.get_fps()
+
+        # Convert seconds to stream timestamp units.
+        timestamp = int(seconds / float(self.video_stream.time_base))
+
+        print("\ntimestamp =", timestamp, "\n")
+
+        # Seek to the nearest keyframe.
+        self.container.seek(
+            timestamp,
+            stream=self.video_stream,
+            backward=True,
+        )
+
+        # Recreate the packet generator.
+        # streams = [self.video_stream]
+
+        # if self.audio_stream:
+        #    streams.append(self.audio_stream)
+
+        #self.packet_generator = self.container.demux(*streams)
+
+        # Reset decoded frame counters.
+        #self.video_frame_index = frame_index
+        #self.audio_frame_index = 0
+
+>>>>>>> Stashed changes
     def close(self):
         """
         Release the opened media file.

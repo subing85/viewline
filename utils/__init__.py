@@ -61,9 +61,9 @@ import platform
 import webbrowser
 import subprocess
 
-import logger
-import resources
-import constants
+from viewline import logger
+from viewline import resources
+from viewline import constants
 
 LOGGER = logger.getLogger(__name__)
 

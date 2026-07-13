@@ -33,31 +33,31 @@ from PySide6 import QtGui
 from PySide6 import QtCore
 from PySide6 import QtWidgets
 
-from ocio import OCIOProcessor
+from viewline.ocio import OCIOProcessor
 
-from widgets.ocio import OcioWidget
+from viewline.playback.player import MediaPlayer
 
-from widgets.viewer import ViewFrame
+from viewline.widgets.ocio import OcioWidget
 
-from widgets.pixmaps import PathPixmap
-from widgets.pixmaps import NamePixmapIcon
+from viewline.widgets.viewer import ViewFrame
 
-from widgets.buttons import HelpButton
-from widgets.buttons import ThemeButton
+from viewline.widgets.pixmaps import PathPixmap
+from viewline.widgets.pixmaps import NamePixmapIcon
 
-from widgets.dialogs import FileDialog
-from widgets.dialogs import OpenMediaDialog
+from viewline.widgets.buttons import HelpButton
+from viewline.widgets.buttons import ThemeButton
 
-from playback.player import MediaPlayer
+from viewline.widgets.dialogs import FileDialog
+from viewline.widgets.dialogs import OpenMediaDialog
 
-from widgets.recaps import RecapsWidget
-from widgets.styles import SetStylesheet
-from widgets.labels import CopyrightLabel
-from widgets.playlist import PlaylistWidget
+from viewline.widgets.recaps import RecapsWidget
+from viewline.widgets.styles import SetStylesheet
+from viewline.widgets.labels import CopyrightLabel
+from viewline.widgets.playlist import PlaylistWidget
 
-from widgets.layouts import VerticalLayout
-from widgets.layouts import HorizontalLayout
-from widgets.layouts import HorizontalSplitter
+from viewline.widgets.layouts import VerticalLayout
+from viewline.widgets.layouts import HorizontalLayout
+from viewline.widgets.layouts import HorizontalSplitter
 
 LOGGER = logger.getLogger(__name__)
 

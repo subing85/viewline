@@ -57,18 +57,18 @@ from __future__ import absolute_import
 
 import numpy
 
-import utils
-import logger
-import constants
-
 from collections import deque
 
 from PySide6 import QtCore
 from PySide6 import QtMultimedia
 
-from playback.cache import FrameCache
-from playback.reader import MovieReader
-from playback.reader import SequenceReader
+from viewline import utils
+from viewline import logger
+from viewline import constants
+
+from viewline.playback.cache import FrameCache
+from viewline.playback.reader import MovieReader
+from viewline.playback.reader import SequenceReader
 
 LOGGER = logger.getLogger(__name__)
 
