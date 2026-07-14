@@ -20,7 +20,6 @@ Notes:
 
 from OpenGL import GL
 
-
 from viewline import resources
 
 
@@ -37,7 +36,7 @@ class GLShader(object):
         self.vertex_shader = 0
         self.fragment_shader = 0
 
-    def load(self, name):
+    def initialize(self, name="texture"):
         """Load shader source files.
 
         Args:
@@ -52,15 +51,8 @@ class GLShader(object):
 
         self.compile(vertex_source, fragment_source)
 
-    # -------------------------------------------------------------
-    # Compile
-    # -------------------------------------------------------------
 
-    def compile(
-        self,
-        vertex_source,
-        fragment_source,
-    ):
+    def compile(self, vertex_source, fragment_source):
         """Compile and link a shader program.
 
         Args:
@@ -73,75 +65,30 @@ class GLShader(object):
 
         self.destroy()
 
-        #
         # Vertex shader
-        #
+        self.vertex_shader = GL.glCreateShader(GL.GL_VERTEX_SHADER)
 
-        self.vertex_shader = GL.glCreateShader(
-            GL.GL_VERTEX_SHADER
-        )
+        GL.glShaderSource(self.vertex_shader, vertex_source)
+        GL.glCompileShader(self.vertex_shader)
 
-        GL.glShaderSource(
-            self.vertex_shader,
-            vertex_source,
-        )
+        self._check_shader(self.vertex_shader, "Vertex Shader")
 
-        GL.glCompileShader(
-            self.vertex_shader,
-        )
-
-        self._check_shader(
-            self.vertex_shader,
-            "Vertex Shader",
-        )
-
-        #
         # Fragment shader
-        #
+        self.fragment_shader = GL.glCreateShader(GL.GL_FRAGMENT_SHADER)
 
-        self.fragment_shader = GL.glCreateShader(
-            GL.GL_FRAGMENT_SHADER
-        )
+        GL.glShaderSource(self.fragment_shader, fragment_source)
+        GL.glCompileShader(self.fragment_shader)
 
-        GL.glShaderSource(
-            self.fragment_shader,
-            fragment_source,
-        )
+        self._check_shader(self.fragment_shader, "Fragment Shader")
 
-        GL.glCompileShader(
-            self.fragment_shader,
-        )
-
-        self._check_shader(
-            self.fragment_shader,
-            "Fragment Shader",
-        )
-
-        #
         # Link program
-        #
-
         self.program = GL.glCreateProgram()
 
-        GL.glAttachShader(
-            self.program,
-            self.vertex_shader,
-        )
-
-        GL.glAttachShader(
-            self.program,
-            self.fragment_shader,
-        )
-
-        GL.glLinkProgram(
-            self.program,
-        )
+        GL.glAttachShader(self.program, self.vertex_shader)
+        GL.glAttachShader(self.program, self.fragment_shader)
+        GL.glLinkProgram(self.program)
 
         self._check_program()
-
-    # -------------------------------------------------------------
-    # Destroy
-    # -------------------------------------------------------------
 
     def destroy(self):
         """Release GPU shader resources."""
@@ -159,162 +106,94 @@ class GLShader(object):
         self.vertex_shader = 0
         self.fragment_shader = 0
 
-    # -------------------------------------------------------------
-    # Bind
-    # -------------------------------------------------------------
-
     def bind(self):
         """Bind shader program."""
 
-        GL.glUseProgram(
-            self.program,
-        )
+        GL.glUseProgram(self.program)
 
-    # -------------------------------------------------------------
-    # Release
-    # -------------------------------------------------------------
 
     def release(self):
         """Unbind shader program."""
 
         GL.glUseProgram(0)
 
-    # -------------------------------------------------------------
-    # Uniforms
-    # -------------------------------------------------------------
-
-    def uniform_location(
-        self,
-        name,
-    ):
+    def uniform_location(self, name):
         """Return uniform location."""
 
-        return GL.glGetUniformLocation(
-            self.program,
-            name,
-        )
+        return GL.glGetUniformLocation(self.program, name)
 
-    def set_uniform_int(
-        self,
-        name,
-        value,
-    ):
+    def set_uniform_int(self, name, value):
         """Set integer uniform."""
 
         location = self.uniform_location(name)
 
-        GL.glUniform1i(
-            location,
-            value,
-        )
+        GL.glUniform1i(location, value)
 
-    def set_uniform_float(
-        self,
-        name,
-        value,
-    ):
+    def set_uniform_float(self, name, value):
         """Set float uniform."""
 
         location = self.uniform_location(name)
 
-        GL.glUniform1f(
-            location,
-            value,
-        )
+        GL.glUniform1f(location, value)
 
-    def set_uniform_vec2(
-        self,
-        name,
-        x,
-        y,
-    ):
+    def set_uniform_vec2(self, name, x, y):
         """Set vec2 uniform."""
 
         location = self.uniform_location(name)
 
-        GL.glUniform2f(
-            location,
-            x,
-            y,
-        )
+        GL.glUniform2f(location, x, y)
 
-    def set_uniform_vec3(
-        self,
-        name,
-        x,
-        y,
-        z,
-    ):
+    def set_uniform_vec3(self, name, x, y, z):
         """Set vec3 uniform."""
 
         location = self.uniform_location(name)
 
-        GL.glUniform3f(
+        GL.glUniform3f(location, x, y, z)
+
+    def set_uniform_vec4(self, name, value):
+        """Set vec4 uniform."""
+
+        location = GL.glGetUniformLocation(self.program, name)
+
+        GL.glUniform4f(
             location,
-            x,
-            y,
-            z,
+            float(value[0]),
+            float(value[1]),
+            float(value[2]),
+            float(value[3]),
         )
 
-    def set_uniform_mat4(
-        self,
-        name,
-        matrix,
-    ):
+    def set_uniform_mat4(self, name, matrix):
         """Set mat4 uniform."""
 
         location = self.uniform_location(name)
 
-        GL.glUniformMatrix4fv(
-            location,
-            1,
-            False,
-            matrix,
-        )
+        GL.glUniformMatrix4fv(location, 1, False, matrix)
 
-    # -------------------------------------------------------------
-    # Validation
-    # -------------------------------------------------------------
-
-    def _check_shader(
-        self,
-        shader,
-        label,
-    ):
+    def _check_shader(self, shader, label):
         """Validate shader compilation."""
 
-        status = GL.glGetShaderiv(
-            shader,
-            GL.GL_COMPILE_STATUS,
-        )
+        status = GL.glGetShaderiv(shader, GL.GL_COMPILE_STATUS)
 
         if status:
             return
 
         log = GL.glGetShaderInfoLog(shader)
 
-        raise RuntimeError(
-            f"{label} Compile Error\n\n{log.decode()}"
-        )
+        raise RuntimeError(f"{label} Compile Error\n\n{log.decode()}")
 
     def _check_program(self):
         """Validate program linking."""
 
-        status = GL.glGetProgramiv(
-            self.program,
-            GL.GL_LINK_STATUS,
-        )
+        status = GL.glGetProgramiv(self.program, GL.GL_LINK_STATUS)
 
         if status:
             return
 
-        log = GL.glGetProgramInfoLog(
-            self.program,
-        )
+        log = GL.glGetProgramInfoLog(self.program)
 
-        raise RuntimeError(
-            f"Shader Link Error\n\n{log.decode()}"
-        )
+        raise RuntimeError(f"Shader Link Error\n\n{log.decode()}")
 
 
-
+if __name__ == "__main__":
+    pass

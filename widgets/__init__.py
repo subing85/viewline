@@ -247,7 +247,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Next frame
         self.forwardShortcut = QtGui.QShortcut(QtGui.QKeySequence(QtCore.Qt.Key.Key_Right), self)
-        self.forwardShortcut.activated.connect(self.backward_frame)
+        self.forwardShortcut.activated.connect(self.forward_frame)
 
         # Open media
         self.openShortcut = QtGui.QShortcut(QtGui.QKeySequence("Ctrl+O"), self)

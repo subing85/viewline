@@ -23,9 +23,9 @@ Architecture:
          Screen
 """
 
+import numpy
 import ctypes
 
-import numpy
 from OpenGL import GL
 
 
@@ -38,123 +38,63 @@ class FullscreenQuad(object):
         self.vao = 0
         self.vbo = 0
 
-    # ---------------------------------------------------------
-    # Initialize
-    # ---------------------------------------------------------
-
     def initialize(self):
         """Create OpenGL buffers."""
 
-        #
         # position.xy
         # texcoord.xy
-        #
 
         vertices = numpy.array(
             [
                 # x     y      u     v
+                -1.0, -1.0, 0.0, 1.0,
+                1.0, -1.0, 1.0, 1.0,
+                1.0,  1.0, 1.0, 0.0,
 
-                -1.0, -1.0, 0.0, 0.0,
-                 1.0, -1.0, 1.0, 0.0,
-                 1.0,  1.0, 1.0, 1.0,
-
-                -1.0, -1.0, 0.0, 0.0,
-                 1.0,  1.0, 1.0, 1.0,
-                -1.0,  1.0, 0.0, 1.0,
-
+                -1.0, -1.0, 0.0, 1.0,
+                1.0,  1.0, 1.0, 0.0,
+                -1.0,  1.0, 0.0, 0.0,
             ],
             dtype=numpy.float32,
         )
 
         self.vao = GL.glGenVertexArrays(1)
-
         self.vbo = GL.glGenBuffers(1)
-
         GL.glBindVertexArray(self.vao)
 
-        GL.glBindBuffer(
-            GL.GL_ARRAY_BUFFER,
-            self.vbo,
-        )
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.vbo)
 
-        GL.glBufferData(
-            GL.GL_ARRAY_BUFFER,
-            vertices.nbytes,
-            vertices,
-            GL.GL_STATIC_DRAW,
-        )
-
+        GL.glBufferData(GL.GL_ARRAY_BUFFER, vertices.nbytes, vertices, GL.GL_STATIC_DRAW)
         stride = 4 * 4
 
-        #
         # Position
-        #
-
         GL.glEnableVertexAttribArray(0)
+        GL.glVertexAttribPointer(0, 2, GL.GL_FLOAT, False, stride, ctypes.c_void_p(0))
 
-        GL.glVertexAttribPointer(
-            0,
-            2,
-            GL.GL_FLOAT,
-            False,
-            stride,
-            ctypes.c_void_p(0),
-        )
-
-        #
         # UV
-        #
-
         GL.glEnableVertexAttribArray(1)
-
-        GL.glVertexAttribPointer(
-            1,
-            2,
-            GL.GL_FLOAT,
-            False,
-            stride,
-            ctypes.c_void_p(8),
-        )
+        GL.glVertexAttribPointer(1, 2, GL.GL_FLOAT, False, stride, ctypes.c_void_p(8))
 
         GL.glBindVertexArray(0)
-
-    # ---------------------------------------------------------
-    # Draw
-    # ---------------------------------------------------------
 
     def draw(self):
         """Render fullscreen quad."""
 
-        GL.glBindVertexArray(
-            self.vao,
-        )
-
-        GL.glDrawArrays(
-            GL.GL_TRIANGLES,
-            0,
-            6,
-        )
-
+        GL.glBindVertexArray(self.vao)
+        GL.glDrawArrays(GL.GL_TRIANGLES, 0, 6)
         GL.glBindVertexArray(0)
-
-    # ---------------------------------------------------------
-    # Destroy
-    # ---------------------------------------------------------
 
     def destroy(self):
         """Release GPU resources."""
 
         if self.vbo:
-            GL.glDeleteBuffers(
-                1,
-                [self.vbo],
-            )
+            GL.glDeleteBuffers(1,  [self.vbo])
 
         if self.vao:
-            GL.glDeleteVertexArrays(
-                1,
-                [self.vao],
-            )
+            GL.glDeleteVertexArrays(1, [self.vao])
 
         self.vbo = 0
         self.vao = 0
+
+if __name__ == "__main__":
+    pass

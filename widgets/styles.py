@@ -265,9 +265,12 @@ class StrokePen(QtGui.QPen):
         # Initialize QFont
         super().__init__(QtGui.QColor(*color))
 
+        if kwargs.get("style"):
+            self.setStyle(kwargs["style"])
+
         self.setWidth(kwargs.get("thickness", 1))
         self.setCapStyle(kwargs.get("cap", QtCore.Qt.RoundCap))
-        self.setJoinStyle(kwargs.get("cap", QtCore.Qt.RoundJoin))
+        self.setJoinStyle(kwargs.get("joinStyle", QtCore.Qt.RoundJoin))
         self.setCosmetic(kwargs.get("cosmetic", False))
 
 

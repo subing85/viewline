@@ -945,8 +945,7 @@ class Sketch(object):
             return
 
         # Blue dashed selection pen
-        pen = StrokePen(stroke["color"], thickness=2)
-        painter.setPen(pen)
+        pen = StrokePen((255, 255, 255), thickness=2, style=QtCore.Qt.DashLine)
         painter.setPen(pen)
         painter.drawRect(rect)
 

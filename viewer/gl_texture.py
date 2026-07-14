@@ -33,6 +33,8 @@ Typical Usage:
     ...
 """
 
+import numpy
+
 from OpenGL import GL
 
 
@@ -58,9 +60,16 @@ class GLTexture(object):
         # Pixel type.
         self.pixel_type = GL.GL_UNSIGNED_BYTE
 
-    # ------------------------------------------------------------------
-    # Create
-    # ------------------------------------------------------------------
+    def initialize(self):
+
+        self.texture = GL.glGenTextures(1)
+
+        GL.glBindTexture(GL.GL_TEXTURE_2D, self.texture)
+
+        GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR)
+        GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR)
+
+        GL.glBindTexture(GL.GL_TEXTURE_2D, 0)
 
     def create(self):
         """Create the OpenGL texture."""
@@ -72,43 +81,15 @@ class GLTexture(object):
 
         GL.glBindTexture(GL.GL_TEXTURE_2D, self.texture)
 
-        #
         # Filtering
-        #
+        GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR)
+        GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR)
 
-        GL.glTexParameteri(
-            GL.GL_TEXTURE_2D,
-            GL.GL_TEXTURE_MIN_FILTER,
-            GL.GL_LINEAR,
-        )
-
-        GL.glTexParameteri(
-            GL.GL_TEXTURE_2D,
-            GL.GL_TEXTURE_MAG_FILTER,
-            GL.GL_LINEAR,
-        )
-
-        #
         # Wrapping
-        #
-
-        GL.glTexParameteri(
-            GL.GL_TEXTURE_2D,
-            GL.GL_TEXTURE_WRAP_S,
-            GL.GL_CLAMP_TO_EDGE,
-        )
-
-        GL.glTexParameteri(
-            GL.GL_TEXTURE_2D,
-            GL.GL_TEXTURE_WRAP_T,
-            GL.GL_CLAMP_TO_EDGE,
-        )
+        GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, GL.GL_CLAMP_TO_EDGE)
+        GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP_TO_EDGE)
 
         GL.glBindTexture(GL.GL_TEXTURE_2D, 0)
-
-    # ------------------------------------------------------------------
-    # Destroy
-    # ------------------------------------------------------------------
 
     def destroy(self):
         """Release GPU texture."""
@@ -123,16 +104,7 @@ class GLTexture(object):
         self.width = 0
         self.height = 0
 
-    # ------------------------------------------------------------------
-    # Upload
-    # ------------------------------------------------------------------
-
-    def upload(
-        self,
-        width,
-        height,
-        pixels,
-    ):
+    def upload(self, frame):
         """Upload image pixels.
 
         Args:
@@ -149,15 +121,14 @@ class GLTexture(object):
         if not self.texture:
             self.create()
 
-        GL.glBindTexture(
-            GL.GL_TEXTURE_2D,
-            self.texture,
-        )
+        image = frame.to_ndarray(format="rgb24")
+        image = numpy.ascontiguousarray(image)
 
-        #
+        height, width = image.shape[:2]
+
+        GL.glBindTexture(GL.GL_TEXTURE_2D, self.texture)
+
         # Allocate storage only when size changes.
-        #
-
         if width != self.width or height != self.height:
 
             self.width = width
@@ -175,14 +146,8 @@ class GLTexture(object):
                 None,
             )
 
-        #
         # Upload pixels.
-        #
-
-        GL.glPixelStorei(
-            GL.GL_UNPACK_ALIGNMENT,
-            1,
-        )
+        GL.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 1)
 
         GL.glTexSubImage2D(
             GL.GL_TEXTURE_2D,
@@ -193,22 +158,12 @@ class GLTexture(object):
             height,
             self.pixel_format,
             self.pixel_type,
-            pixels,
+            image,
         )
 
-        GL.glBindTexture(
-            GL.GL_TEXTURE_2D,
-            0,
-        )
+        GL.glBindTexture(GL.GL_TEXTURE_2D, 0)
 
-    # ------------------------------------------------------------------
-    # Bind
-    # ------------------------------------------------------------------
-
-    def bind(
-        self,
-        unit=0,
-    ):
+    def bind(self, unit=0):
         """Bind texture.
 
         Args:
@@ -216,25 +171,14 @@ class GLTexture(object):
                 Texture unit.
         """
 
-        GL.glActiveTexture(
-            GL.GL_TEXTURE0 + unit,
-        )
-
-        GL.glBindTexture(
-            GL.GL_TEXTURE_2D,
-            self.texture,
-        )
-
-    # ------------------------------------------------------------------
-    # Release
-    # ------------------------------------------------------------------
+        GL.glActiveTexture(GL.GL_TEXTURE0 + unit)
+        GL.glBindTexture(GL.GL_TEXTURE_2D, self.texture)
 
     def release(self):
         """Unbind texture."""
 
-        GL.glBindTexture(
-            GL.GL_TEXTURE_2D,
-            0,
-        )
+        GL.glBindTexture(GL.GL_TEXTURE_2D, 0)
 
 
+if __name__ == "__main__":
+    pass

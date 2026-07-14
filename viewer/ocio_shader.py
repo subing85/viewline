@@ -70,12 +70,7 @@ class OCIOShader(object):
         self.display = None
         self.view = None
 
-    def build(
-        self,
-        input_space,
-        display,
-        view,
-    ):
+    def build(self, input_space, display, view):
         """
         Build GPU shader.
 
@@ -94,51 +89,27 @@ class OCIOShader(object):
         self.display = display
         self.view = view
 
-        #
         # Build display processor
-        #
-
-        processor = self.config.getProcessor(
-            input_space,
-            display,
-            view,
-        )
+        processor = self.config.getProcessor(input_space, display, view)
 
         self.processor = processor
 
         self.gpu_processor = processor.getDefaultGPUProcessor()
 
-        #
         # Build GLSL shader
-        #
-
         shader_desc = GPUShaderDesc.CreateShaderDesc()
 
-        shader_desc.setLanguage(
-            GPUShaderDesc.LANGUAGE_GLSL_330_CORE
-        )
+        shader_desc.setLanguage(GPUShaderDesc.LANGUAGE_GLSL_330_CORE)
 
-        shader_desc.setFunctionName(
-            "OCIODisplay"
-        )
+        shader_desc.setFunctionName("OCIODisplay")
 
-        self.gpu_processor.extractGpuShaderInfo(
-            shader_desc
-        )
+        self.gpu_processor.extractGpuShaderInfo(shader_desc)
 
-        fragment = self.create_fragment_shader(
-            shader_desc.getShaderText()
-        )
+        fragment = self.create_fragment_shader(shader_desc.getShaderText())
 
-        self.shader.compile(
-            VERTEX_SHADER,
-            fragment,
-        )
+        self.shader.compile(VERTEX_SHADER, fragment)
 
-    def create_fragment_shader(
-        self,
-        ocio_shader,
-    ):
+    def create_fragment_shader(self, ocio_shader):
         """
         Create complete fragment shader.
 
@@ -148,31 +119,49 @@ class OCIOShader(object):
 
         Returns:
             str
+
+        #version 330 core
+
+        in vec2 uv;
+
+        out vec4 FragColor;
+
+        uniform sampler2D imageTexture;
+
+        {ocio_shader}
+
+        void main()
+        {{
+            vec4 color = texture(
+                imageTexture,
+                uv
+            );
+
+            color = OCIODisplay(color);
+
+            FragColor = color;
+        }}
+                    
         """
 
-        return f"""
-#version 330 core
+        codes = [
+            "#version 330 core\n",
+            "in vec2 uv;\n",
+            "out vec4 FragColor;\n",
+            "uniform sampler2D imageTexture;\n",
+            f"{ocio_shader}\n",
+            "void main()\n",
+            "{{",
+            "\tvec4 color = texture(",
+            "\t\timageTexture,",
+            "\t\tuv",
+            "\t);\n",
+            "\tcolor = OCIODisplay(color);\n",
+            "\tFragColor = color;",
+            "}}",
+        ]
 
-in vec2 uv;
-
-out vec4 FragColor;
-
-uniform sampler2D imageTexture;
-
-{ocio_shader}
-
-void main()
-{{
-    vec4 color = texture(
-        imageTexture,
-        uv
-    );
-
-    color = OCIODisplay(color);
-
-    FragColor = color;
-}}
-"""
+        return "\n".join(codes)
 
     def bind(self):
         """Bind GPU shader."""
@@ -188,3 +177,7 @@ void main()
         """Destroy OpenGL shader."""
 
         self.shader.destroy()
+
+
+if __name__ == "__main__":
+    pass

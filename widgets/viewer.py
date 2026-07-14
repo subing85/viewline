@@ -126,10 +126,7 @@ Notes:
 
 from __future__ import absolute_import
 
-import utils
 import numpy
-import logger
-
 
 from OpenGL import GL
 
@@ -138,6 +135,8 @@ from PySide6 import QtCore
 from PySide6 import QtWidgets
 from PySide6 import QtOpenGLWidgets
 
+from viewline import utils
+from viewline import logger
 from viewline import constants
 
 from viewline.widgets.annotations import Sketch
@@ -178,6 +177,9 @@ from viewline.widgets.layouts import HorizontalSpacer
 
 from viewline.widgets.lineedits import ThicknesSpinBox
 from viewline.widgets.fontdialog import TxtInputDialog
+
+
+from viewline.viewer.gl_viewer import GLViewer
 
 LOGGER = logger.getLogger(__name__)
 
@@ -226,6 +228,8 @@ class ViewFrame(QtWidgets.QFrame):
         # OpenGL Viewer
         # --------------------------------------------------
         self.viewer = ViewerWidget(self)
+
+        # self.viewer = GLViewer(self)
         self.verticallayout.addWidget(self.viewer)
 
         # --------------------------------------------------
@@ -1360,8 +1364,6 @@ class ViewerWidget(QtOpenGLWidgets.QOpenGLWidget):
         painter.setRenderHint(QtGui.QPainter.TextAntialiasing, True)
         painter.setRenderHint(QtGui.QPainter.SmoothPixmapTransform, True)
 
-        rect = self.display_rect
-
         # Draw overlays by position
         # for position in self.overlay_options:
         #     self.draw_overlay_position(painter, rect, position)
@@ -1501,23 +1503,14 @@ class ViewerWidget(QtOpenGLWidgets.QOpenGLWidget):
             ).copy()
         else:
             image = QtGui.QImage(
-                frame.data,
-                width,
-                height,
-                width * 3,
-                QtGui.QImage.Format_RGB888,
+                frame.data, width, height, width * 3, QtGui.QImage.Format_RGB888,
             ).copy()
 
         painter = QtGui.QPainter(image)
 
         self.annotations.set_frame(self.current_frame)
 
-        image_rect = QtCore.QRect(
-            0,
-            0,
-            width,
-            height,
-        )
+        image_rect = QtCore.QRect(0, 0, width, height)
 
         self.annotations.draw(
             painter,

@@ -1081,7 +1081,7 @@ class MoviePlayer(BasePlayer):
             # Display the decoded frame.
             self.display_video_frame(frame)
 
-    def display_video_frame(self, frame):
+    def display_video_frame_v1(self, frame):
         """Display a decoded video frame.
 
         Converts a decoded PyAV video frame into an RGB image suitable for display, optionally applies an OpenColorIO display transform,
@@ -1131,6 +1131,17 @@ class MoviePlayer(BasePlayer):
         self.frame_ready.emit(image)
 
         # Send the image to the viewer.
+        self.frame_changed.emit(frame_number)
+
+
+    def display_video_frame(self, frame):
+        """Emit decoded AVFrame."""
+
+        frame_number = (self.start_frame + round(frame.time * self.reader.get_fps()))
+
+        # Send AVFrame directly.
+        self.frame_ready.emit(frame)
+
         self.frame_changed.emit(frame_number)
 
     def play_audio(self, current_time):
