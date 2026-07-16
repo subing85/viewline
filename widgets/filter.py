@@ -73,22 +73,9 @@ class ColorFilterWidget(QtWidgets.QWidget):
         self.closeButton = TextButton(None, label="Close", tooltip="Close the Color Filter")
         self.horizontallayout.addWidget(self.closeButton)
 
-        self.resetButton = TextButton(
-            None, label="Reset", tooltip="Reset the Color Filter to default values"
-        )
-        self.horizontallayout.addWidget(self.resetButton)
+        self.tabWidget.setCurrentIndex(0)
 
-        self.applyButton = TextButton(
-            None, label="Apply", tooltip="Apply the Color Filter value to viewline"
-        )
-        self.horizontallayout.addWidget(self.applyButton)
-
-        self.saveButton = TextButton(
-            None, label="Save", tooltip="Save and Apply the Color Filter value to viewline"
-        )
-        self.horizontallayout.addWidget(self.saveButton)
-
-        self.tabWidget.setCurrentIndex(2)
+        self.closeButton.clicked.connect(self.close)
 
     def setupIcons(self):
         """
@@ -97,6 +84,10 @@ class ColorFilterWidget(QtWidgets.QWidget):
 
         pixmap = NamePixmapIcon(constants.VL_COLOR_FILTER_TOOL_ICON)
         self.setWindowIcon(pixmap)
+    
+    def reset(self):
+        self.stylesWidget.reset_all()
+
 
 
 class DisplayWidget(QtWidgets.QWidget):
@@ -107,10 +98,6 @@ class DisplayWidget(QtWidgets.QWidget):
         super(DisplayWidget, self).__init__(parent)
 
         self.displaySettings = DisplaySettings()
-
-        # self.parameters = [
-        #     "Exposure", "Gamma", "Brightness", "Contrast",  "Stauration", "Hue", "Gain", "Offset", "Overlay Color", "Sepia"
-        # ]
 
         self.setupUi()
 
@@ -198,9 +185,9 @@ class StylesWidget(QtWidgets.QWidget):
         self.verticalSpacer = VerticalSpacer()
         self.verticallayout.addItem(self.verticalSpacer)
 
-        parameters = self.styleSettings.parameters()
+        self.parameters = self.styleSettings.parameters()
 
-        for index, parameter in enumerate(parameters):
+        for index, parameter in enumerate(self.parameters):
             widget = RightLabel(self, parameter.label)
             self.gridlayout.addWidget(widget, index, 0, 1, 1)
 
@@ -215,7 +202,7 @@ class StylesWidget(QtWidgets.QWidget):
 
             resetButton = ResetButton(self, width=18, height=18)
             resetButton.clicked.connect(
-                lambda clicked, x=(slider, widget), param=parameter: self.reset(x, param)
+                lambda clicked, x=slider, param=parameter: self.reset(x, param)
             )
             self.gridlayout.addWidget(resetButton, index, 2, 1, 1)
 
@@ -224,13 +211,10 @@ class StylesWidget(QtWidgets.QWidget):
         parameter.value = value
         self.style_changed.emit(parameter)
 
-    def reset(self, widgets, parameter):
+    def reset(self, slider, parameter):
         parameter.reset()
         value = parameter.slider_value()
-        widgets[0].setValue(value)
-
-        if isinstance(widgets[1], ColorButton):
-            widgets[1].setColor((255, 0, 0))
+        slider.setValue(value)
 
 
 class FilterWidget(QtWidgets.QWidget):

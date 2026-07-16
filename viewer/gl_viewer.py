@@ -79,9 +79,12 @@ class GLViewer(QtOpenGLWidgets.QOpenGLWidget):
 
         # Expand inside layouts.
 
-        self.setSizePolicy(
+        # Configure expanding size policy
+        sizePolicy = QtWidgets.QSizePolicy(
             QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Expanding
         )
+
+        self.setSizePolicy(sizePolicy)
 
         # Enable multisampling.
 
