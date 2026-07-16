@@ -202,6 +202,8 @@ REVIEW_TYPES = [
 
 VIEWER_SAMPLES_RATE = 8
 
+VL_OCIO_TOOL_ICON = "ocio"
+VL_COLOR_FILTER_TOOL_ICON = "filter"
 
 COPYRIGHT_LABEL = "Support, Subin. Gopi (subing85@gmail.com)."
 

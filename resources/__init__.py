@@ -146,7 +146,6 @@ def readShader(name):
     with open(fragment_path, "r", encoding="utf-8") as stream:
         fragment_source = stream.read()
 
-
     return vertex_source, fragment_source
 
 

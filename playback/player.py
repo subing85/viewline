@@ -1133,11 +1133,10 @@ class MoviePlayer(BasePlayer):
         # Send the image to the viewer.
         self.frame_changed.emit(frame_number)
 
-
     def display_video_frame(self, frame):
         """Emit decoded AVFrame."""
 
-        frame_number = (self.start_frame + round(frame.time * self.reader.get_fps()))
+        frame_number = self.start_frame + round(frame.time * self.reader.get_fps())
 
         # Send AVFrame directly.
         self.frame_ready.emit(frame)
@@ -1504,6 +1503,14 @@ class MoviePlayer(BasePlayer):
 
         # Store the active display view.
         self.view = view
+
+        print("\nprocessor", processor)
+        print(
+            "input_space",
+            input_space,
+        )
+        print("display", display)
+        print("view", view, "\n")
 
         # Configure the processor using the selected display transform.
         if self.ocio_processor:

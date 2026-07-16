@@ -1,4 +1,3 @@
-
 from collections import deque
 
 from PySide6 import QtCore
@@ -37,7 +36,6 @@ class BasePlayer(QtCore.QObject):
 
     # Playback state changed.
     timeline_actived = QtCore.Signal(int)
-
 
 
 class MoviePlayer(BasePlayer):
@@ -217,7 +215,6 @@ class MoviePlayer(BasePlayer):
 
         self.timeline_actived.emit(False)
 
-
     # ---------------------------------------------------------
     # Load
     # ---------------------------------------------------------
@@ -269,11 +266,8 @@ class MoviePlayer(BasePlayer):
         if self.reader.has_audio():
 
             self.audio_player.initialize(
-
                 self.reader.sample_rate(),
-
                 self.reader.channels(),
-
             )
 
         #
@@ -281,9 +275,7 @@ class MoviePlayer(BasePlayer):
         #
 
         self.seek(
-
             self.start_frame,
-
         )
 
         #
@@ -297,11 +289,8 @@ class MoviePlayer(BasePlayer):
         #
 
         self.cache_changed.emit(
-
             self.cache.cached_frames(),
-
         )
-
 
     # ---------------------------------------------------------
     # Close
@@ -345,7 +334,7 @@ class MoviePlayer(BasePlayer):
 
             self.ocio_shader.destroy()
 
-            self.ocio_shader = None        
+            self.ocio_shader = None
 
 
 class AudioPlayer(QtCore.QObject):
@@ -596,4 +585,3 @@ class AudioPlayer(QtCore.QObject):
 
         # Create a fresh writable stream.
         self.io_device = self.audio_sink.start()
-

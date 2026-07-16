@@ -480,6 +480,9 @@ class OCIOProcessor(object):
         """
 
         self.enabled = False
+        self.color_space = None
+        self.display = None
+        self.view = None
 
         if config_path:
             self.config = PyOpenColorIO.Config.CreateFromFile(config_path)
@@ -488,6 +491,15 @@ class OCIOProcessor(object):
 
     def set_enabled(self, enabled):
         self.enabled = enabled
+
+    def set_color_space(self, color_space):
+        self.color_space = color_space
+
+    def set_display(self, display):
+        self.display = display
+
+    def set_view(self, view):
+        self.view = view
 
     def get_color_spaces(self):
         """Return available OCIO color spaces.
@@ -535,7 +547,7 @@ class OCIOProcessor(object):
 
         return self.config.getViews(display)
 
-    def process_image_by(self, image, input_space, display, view):
+    def process_image_by(self, image, **kwargs):
         """Apply OCIO display transform to an image.
 
         This method applies a display/view transform to an
@@ -563,7 +575,7 @@ class OCIOProcessor(object):
                 Expected dtype:
                     float32
 
-            input_space (str):
+            color_space (str):
                 Source/input color space.
 
             display (str):
@@ -579,7 +591,7 @@ class OCIOProcessor(object):
         Example:
             >>> processed = ocio.process_image(
             ...     image,
-            ...     input_space="ACEScg",
+            ...     color_space="ACEScg",
             ...     display="sRGB",
             ...     view="Film"
             ... )
@@ -591,11 +603,15 @@ class OCIOProcessor(object):
             - GPU processing is not implemented yet.
         """
 
+        self.color_space = kwargs.get("color_space", self.color_space)
+        self.display = kwargs.get("display", self.display)
+        self.view = kwargs.get("view", self.view)
+
         # Create Display/View Transform
         transform = PyOpenColorIO.DisplayViewTransform()
-        transform.setSrc(input_space)
-        transform.setDisplay(display)
-        transform.setView(view)
+        transform.setSrc(self.color_space)
+        transform.setDisplay(self.display)
+        transform.setView(self.view)
 
         # Create Processor
         processor = self.config.getProcessor(transform)
@@ -609,7 +625,7 @@ class OCIOProcessor(object):
 
         return image
 
-    def set_display_transform(self, input_space, display, view):
+    def set_display_transform(self, **kwargs):
         """
         Build and cache the OCIO display transform processor.
 
@@ -619,7 +635,7 @@ class OCIOProcessor(object):
         during playback without rebuilding the transform.
 
         Args:
-            input_space (str):
+            color_space (str):
                 Source/input color space of the image
                 (e.g. ``"ACEScg"``, ``"Utility - Linear - sRGB"``).
 
@@ -661,23 +677,46 @@ class OCIOProcessor(object):
                     ↓
             Cached CPU Processor
         """
+
+        self.color_space = kwargs.get("color_space", self.color_space)
+        self.display = kwargs.get("display", self.display)
+        self.view = kwargs.get("view", self.view)
+
         # Create an OCIO Display/View transform object.
         transform = PyOpenColorIO.DisplayViewTransform()
 
         # Specify the source (input) color space.
-        transform.setSrc(input_space)
+        transform.setSrc(self.color_space)
 
         # Specify the destination display device.
-        transform.setDisplay(display)
+        transform.setDisplay(self.display)
 
         # Specify the display view (tone mapping / look).
-        transform.setView(view)
+        transform.setView(self.view)
+
+        return transform
 
         # Build an optimized OCIO processor from the transform.
-        processor = self.config.getProcessor(transform)
+        # processor = self.config.getProcessor(transform)
 
         # Cache the CPU processor for fast per-frame image processing.
-        self.cpu_processor = processor.getDefaultCPUProcessor()
+        # self.cpu_processor = processor.getDefaultCPUProcessor()
+
+        # return processor
+
+    def get_processor(self):
+
+        transform = self.set_display_transform()
+        processor = self.config.getProcessor(transform)
+
+        return processor
+
+    def get_default_GPU_processor(self):
+
+        processor = self.get_processor()
+        gpu_processor = processor.getDefaultGPUProcessor()
+
+        return gpu_processor
 
     def process_image(self, image):
         """

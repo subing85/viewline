@@ -57,16 +57,20 @@ from viewline import constants
 from .fullscreen_quad import FullscreenQuad
 from .gl_shader import GLShader
 from .gl_texture import GLTexture
+from .ocio_shader import OCIOShader
 
 from viewline.widgets.annotations import Sketch
 
+
+from viewline.ocio import OCIOProcessor
+
 LOGGER = logger.getLogger(__name__)
+
 
 class GLViewer(QtOpenGLWidgets.QOpenGLWidget):
     """Modern OpenGL image viewer."""
 
     render_finished = QtCore.Signal(str)
-
 
     def __init__(self, parent=None):
         """Create OpenGL viewer."""
@@ -75,17 +79,28 @@ class GLViewer(QtOpenGLWidgets.QOpenGLWidget):
 
         # Expand inside layouts.
 
-        self.setSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Expanding)
+        self.setSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Expanding
+        )
 
         # Enable multisampling.
 
         self.set_samples(constants.VIEWER_SAMPLES_RATE)
+
+        # self.ocio_processor = OCIOProcessor(config_path="D:/works/developments/devkit/ocio/studio-config-v4.0.0_aces-v2.0_ocio-v2.5.ocio")
+        self.ocio_processor = None
+
+        # self.ocio_processor.set_color_space("ACEScg")
+        # self.ocio_processor.set_display("sRGB - Display")
+        # self.ocio_processor.set_view("ACES 2.0 - SDR 100 nits (Rec.709)")
 
         # OpenGL resources.
 
         self.texture = None
         self.shader = None
         self.quad = None
+        self.ocio_shader = None  # GPU OCIO shader
+        self.use_ocio = False
 
         # Current image.
 
@@ -102,7 +117,6 @@ class GLViewer(QtOpenGLWidgets.QOpenGLWidget):
         self.current_frame = None
 
         # Camera
-
         # Current zoom factor.
         # 1.0 = Fit
         # 2.0 = 200%
@@ -110,12 +124,14 @@ class GLViewer(QtOpenGLWidgets.QOpenGLWidget):
         self.zoom = 1.0
 
         # Pan offset (normalized).
-
         self.pan = QtCore.QPointF(0.0, 0.0)
 
         # Viewer mode.
-
         self.fit_mode = True
+
+        self.display_parameter = None
+        self.style_parameter = None
+        self.filter_parameter = None
 
         # Annotation system.
         self.annotations = Sketch()
@@ -129,8 +145,6 @@ class GLViewer(QtOpenGLWidgets.QOpenGLWidget):
 
     def initializeGL(self):
         """Initialize OpenGL resources."""
-
-        print("\ninitializeGL()")        
 
         # Background colour.
         GL.glClearColor(0.1, 0.1, 0.1, 1.0)
@@ -149,7 +163,10 @@ class GLViewer(QtOpenGLWidgets.QOpenGLWidget):
 
         # Compile default shader.
         self.shader = GLShader()
-        self.shader.initialize(name="texture")
+        self.shader.initialize(name="display")
+
+        # if self.ocio_processor:
+        self.build_ocio_shader()
 
     def resizeGL(self, width, height):
         """Viewport resized."""
@@ -176,7 +193,6 @@ class GLViewer(QtOpenGLWidgets.QOpenGLWidget):
 
         # Texture upload happens inside paintGL().
         self.update()
-
 
     def clear(self):
         """Clear viewer."""
@@ -235,20 +251,59 @@ class GLViewer(QtOpenGLWidgets.QOpenGLWidget):
         # Bind texture.
         self.texture.bind(0)
 
+        # self.use_ocio = False
+
+        if self.use_ocio:
+            self.active_shader = self.ocio_shader
+        else:
+            self.active_shader = self.shader
+
         # Use texture shader.
-        self.shader.bind()
+        self.active_shader.bind()
 
         # Texture unit.
-        self.shader.set_uniform_int("imageTexture", 0)
+        self.active_shader.set_uniform_int("imageTexture", 0)
 
         # Viewport size.
-        self.shader.set_uniform_vec2("viewportSize", float(self.width()), float(self.height()))
+        self.active_shader.set_uniform_vec2(
+            "viewportSize", float(self.width()), float(self.height())
+        )
 
         # Image size.
-        self.shader.set_uniform_vec2("imageSize", self.image_width, self.image_height)
+        self.active_shader.set_uniform_vec2("imageSize", self.image_width, self.image_height)
+
+        if self.display_parameter:
+            self.active_shader.set_uniform_float(
+                self.display_parameter.control, self.display_parameter.value
+            )
+
+            if self.display_parameter.is_color:
+                self.active_shader.set_uniform_vec3(
+                    self.display_parameter.color_control, *self.display_parameter.color
+                )
+
+        if self.style_parameter:
+            self.active_shader.set_uniform_float(
+                self.style_parameter.control, self.style_parameter.value
+            )
+
+        if self.filter_parameter:
+            self.active_shader.set_uniform_vec2(
+                "uTexelSize", 1.0 / self.image_width, 1.0 / self.image_height
+            )
+
+            self.active_shader.set_uniform_vec2(
+                "uResolution",
+                float(self.image_width),
+                float(self.image_height),
+            )
+
+            self.active_shader.set_uniform_float(
+                self.filter_parameter.control, self.filter_parameter.value
+            )
 
         # Display rectangle.
-        self.shader.set_uniform_vec4(
+        self.active_shader.set_uniform_vec4(
             "displayRect",
             (
                 self.display_rect.left(),
@@ -262,13 +317,14 @@ class GLViewer(QtOpenGLWidgets.QOpenGLWidget):
         self.quad.draw()
 
         # Release shader.
-        self.shader.release()
+        self.active_shader.release()
 
         # Release texture.
         self.texture.release()
 
         # Draw overlays.
         self.draw_overlay()
+        # self.set_ocio(None)
 
     def update_display_rect(self):
         """Calculate fitted display rectangle."""
@@ -283,9 +339,9 @@ class GLViewer(QtOpenGLWidgets.QOpenGLWidget):
         viewport_height = int(self.height() * dpr)
 
         # Image aspect.
-        image_aspect = (self.image_width / self.image_height)
+        image_aspect = self.image_width / self.image_height
 
-        viewport_aspect = (viewport_width / viewport_height)
+        viewport_aspect = viewport_width / viewport_height
 
         # Fit image.
         if image_aspect > viewport_aspect:
@@ -446,7 +502,6 @@ class GLViewer(QtOpenGLWidgets.QOpenGLWidget):
 
         self.update()
 
-
     def undo_strokes(self):
         """
         Undo current frame annotation.
@@ -545,7 +600,6 @@ class GLViewer(QtOpenGLWidgets.QOpenGLWidget):
 
         return QtCore.QPointF(x, y)
 
-
     def render_current_frame(self):
         """
         Render source frame with annotations.
@@ -557,7 +611,9 @@ class GLViewer(QtOpenGLWidgets.QOpenGLWidget):
         if self.frame is None:
             return None
 
-        frame = self.frame.copy()
+        # Convert AVFrame -> RGB NumPy image.
+        frame = self.frame.to_ndarray(format="rgb24")
+        frame = numpy.ascontiguousarray(frame)
 
         height, width, channels = frame.shape
         frame = numpy.ascontiguousarray(frame)
@@ -579,12 +635,7 @@ class GLViewer(QtOpenGLWidgets.QOpenGLWidget):
 
         self.annotations.set_frame(self.current_frame)
 
-        image_rect = QtCore.QRect(
-            0,
-            0,
-            width,
-            height,
-        )
+        image_rect = QtCore.QRect(0, 0, width, height)
 
         self.annotations.draw(
             painter,
@@ -614,6 +665,52 @@ class GLViewer(QtOpenGLWidgets.QOpenGLWidget):
 
             if post_process:
                 self.render_finished.emit(None)
+
+    def set_ocio(self, processor):
+        """Update the active OCIO display transform."""
+
+        self.ocio_processor = processor
+
+        # Rebuild GPU shader if OpenGL already exists.
+        # if self.context() is not None:
+        self.build_ocio_shader()
+
+        self.update()
+
+    def build_ocio_shader(self):
+        """Build GPU OCIO shader."""
+
+        # if self.ocio_processor is None:
+        #    self.use_ocio = False
+        #    self.ocio_shader = None
+        #    return
+
+        # ocio_processor = OCIOProcessor(config_path="D:/works/developments/devkit/ocio/studio-config-v4.0.0_aces-v2.0_ocio-v2.5.ocio")
+        # ocio_processor.set_color_space("sRGB - Display")
+        # ocio_processor.set_display("sRGB - Display")
+        # ocio_processor.set_view("ACES 2.0 - SDR 100 nits (Rec.709)")
+
+        ocio_processor = self.ocio_processor
+
+        self.ocio_shader = OCIOShader(None)
+        self.ocio_shader.build(ocio_processor)
+
+        self.ocio_shader.release()
+
+        self.use_ocio = True
+
+    def display_changed(self, parameter):
+        self.display_parameter = parameter
+        self.update()
+
+    def style_changed(self, parameter):
+        self.style_parameter = parameter
+        self.update()
+
+    def filter_changed(self, parameter):
+        self.filter_parameter = parameter
+        self.update()
+
 
 if __name__ == "__main__":
     pass

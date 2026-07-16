@@ -36,7 +36,7 @@ class GLShader(object):
         self.vertex_shader = 0
         self.fragment_shader = 0
 
-    def initialize(self, name="texture"):
+    def initialize(self, name="display"):
         """Load shader source files.
 
         Args:
@@ -50,7 +50,6 @@ class GLShader(object):
         vertex_source, fragment_source = resources.readShader(name)
 
         self.compile(vertex_source, fragment_source)
-
 
     def compile(self, vertex_source, fragment_source):
         """Compile and link a shader program.
@@ -110,7 +109,6 @@ class GLShader(object):
         """Bind shader program."""
 
         GL.glUseProgram(self.program)
-
 
     def release(self):
         """Unbind shader program."""

@@ -150,6 +150,7 @@ from viewline.widgets.buttons import OcioButton
 from viewline.widgets.buttons import ColorButton
 from viewline.widgets.buttons import ClearButton
 from viewline.widgets.buttons import ArrowButton
+from viewline.widgets.buttons import FilterButton
 from viewline.widgets.buttons import PencilButton
 from viewline.widgets.buttons import EraserButton
 from viewline.widgets.buttons import RenderButton
@@ -227,9 +228,9 @@ class ViewFrame(QtWidgets.QFrame):
         # --------------------------------------------------
         # OpenGL Viewer
         # --------------------------------------------------
-        self.viewer = ViewerWidget(self)
+        # self.viewer = ViewerWidget(self)
 
-        # self.viewer = GLViewer(self)
+        self.viewer = GLViewer(self)
         self.verticallayout.addWidget(self.viewer)
 
         # --------------------------------------------------
@@ -323,6 +324,9 @@ class ViewToolbarLayout(HorizontalLayout):
     # Signal emitted when click ocio button
     ocio_trigger = QtCore.Signal(bool)
 
+    # Signal emitted when click filter button
+    filter_trigger = QtCore.Signal(bool)
+
     # Signal emitted when current AOV changes
     aov_changed = QtCore.Signal(str)
 
@@ -383,6 +387,12 @@ class ViewToolbarLayout(HorizontalLayout):
         # --------------------------------------------------
         self.ocioButton = OcioButton(None)
         self.addWidget(self.ocioButton)
+
+        # --------------------------------------------------
+        # Color Filter Selection
+        # --------------------------------------------------
+        self.filterButton = FilterButton(None)
+        self.addWidget(self.filterButton)
 
         # --------------------------------------------------
         # AOV Selection
@@ -540,8 +550,11 @@ class ViewToolbarLayout(HorizontalLayout):
         # Open media action
         self.openButton.clicked.connect(self.open)
 
-        #
+        # Call Ocio widget
         self.ocioButton.clicked.connect(self.call_ocio)
+
+        # Call Filter widget
+        self.filterButton.clicked.connect(self.call_filter)
 
         # AOV selection
         self.aovsCombobox.currentTextChanged.connect(self.set_current_aov)
@@ -613,6 +626,9 @@ class ViewToolbarLayout(HorizontalLayout):
 
     def call_ocio(self):
         self.ocio_trigger.emit(True)
+
+    def call_filter(self):
+        self.filter_trigger.emit(True)
 
     def set_aovs(self, typed, aovs):
         """
@@ -1173,9 +1189,14 @@ class ViewerWidget(QtOpenGLWidgets.QOpenGLWidget):
         self.image_width = None
         self.image_height = None
 
+        self.displaySettings = None
+
         self.set_samples(value=constants.VIEWER_SAMPLES_RATE)
 
         self.annotations = Sketch()
+
+    def set_display_settings(self, display_settings):
+        self.displaySettings = display_settings
 
     def set_samples(self, value=8):
         """
@@ -1200,8 +1221,6 @@ class ViewerWidget(QtOpenGLWidgets.QOpenGLWidget):
         """
 
         self.frame = frame
-
-        #  print("\nself.frame =", self.frame)
 
         # Refresh OpenGL widget
         self.update()
@@ -1503,7 +1522,11 @@ class ViewerWidget(QtOpenGLWidgets.QOpenGLWidget):
             ).copy()
         else:
             image = QtGui.QImage(
-                frame.data, width, height, width * 3, QtGui.QImage.Format_RGB888,
+                frame.data,
+                width,
+                height,
+                width * 3,
+                QtGui.QImage.Format_RGB888,
             ).copy()
 
         painter = QtGui.QPainter(image)

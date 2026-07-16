@@ -125,5 +125,37 @@ class VolumeSlider(QtWidgets.QSlider):
         self.setMaximumSize(QtCore.QSize(150, 16777215))
 
 
+class NormalSlider(QtWidgets.QSlider):
+
+    def __init__(self, parent, *args, **kwargs):
+
+        # Initialize base slider.
+        super(NormalSlider, self).__init__(parent)
+
+        minimum = kwargs.get("minimum", -100)
+        maximum = kwargs.get("maximum", 100)
+        single_step = kwargs.get("singleStep", 1)
+        page_step = kwargs.get("pageStep", 1)
+
+        self.setMinimum(minimum)
+        self.setMaximum(maximum)
+        self.setSingleStep(single_step)
+        self.setPageStep(page_step)
+        self.setRange(minimum, maximum)
+
+        value = kwargs.get("value", (minimum + maximum) / 2)
+
+        self.setValue(value)
+
+        # Horizontal volume control.
+        self.setOrientation(QtCore.Qt.Orientation.Horizontal)
+        self.setTickPosition(QtWidgets.QSlider.TickPosition.NoTicks)
+
+        # sizePolicy = QtWidgets.QSizePolicy(
+        #    QtWidgets.QSizePolicy.Policy.Preferred, QtWidgets.QSizePolicy.Policy.Preferred
+        # )
+        # self.setSizePolicy(sizePolicy)
+
+
 if __name__ == "__main__":
     pass

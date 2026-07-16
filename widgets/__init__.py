@@ -24,20 +24,23 @@ The MainWindow class acts as the central controller between the playback engine,
 
 from __future__ import absolute_import
 
-import utils
-import logger
-import resources
-import constants
 
 from PySide6 import QtGui
 from PySide6 import QtCore
 from PySide6 import QtWidgets
+
+from viewline import utils
+from viewline import logger
+from viewline import resources
+from viewline import constants
 
 from viewline.ocio import OCIOProcessor
 
 from viewline.playback.player import MediaPlayer
 
 from viewline.widgets.ocio import OcioWidget
+
+from viewline.widgets.filter import ColorFilterWidget
 
 from viewline.widgets.viewer import ViewFrame
 
@@ -97,6 +100,8 @@ class MainWindow(QtWidgets.QMainWindow):
         # OCIO color processor
         self.ocio = OCIOProcessor()
 
+        # Display Settings
+
         # Playback controller
         self.player = MediaPlayer()
 
@@ -109,6 +114,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.current_theme = constants.DEFAULT_THEME
 
         self.ocio_widget = OcioWidget(None)
+
+        self.filter_widget = ColorFilterWidget(None)
 
         # Build UI
         self.setupUi()
@@ -189,7 +196,16 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.viewframe.viewToolbarLayout.open_trigger.connect(self.open_media)
         self.viewframe.viewToolbarLayout.ocio_trigger.connect(self.call_ocio)
-        self.ocio_widget.ocio_changed.connect(self.player.set_ocio)
+        # self.ocio_widget.ocio_changed.connect(self.player.set_ocio)
+        self.ocio_widget.ocio_changed.connect(self.viewframe.viewer.set_ocio)
+
+        self.viewframe.viewToolbarLayout.filter_trigger.connect(self.call_filter)
+
+        self.filter_widget.displayWidget.display_changed.connect(
+            self.viewframe.viewer.display_changed
+        )
+        self.filter_widget.stylesWidget.style_changed.connect(self.viewframe.viewer.style_changed)
+        self.filter_widget.filterWidget.filter_changed.connect(self.viewframe.viewer.filter_changed)
 
         ########################################################################
 
@@ -275,6 +291,10 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         Setup the main window icon.
         """
+
+        # icon = QtGui.QIcon()
+        # icon.addFile("D:/works/developments/viewline/resources/icons/mc-viewline.png")
+        # self.setWindowIcon(icon)
 
         pixmap = NamePixmapIcon(constants.VL_TOOL_ICON)
         self.setWindowIcon(pixmap)
@@ -370,6 +390,17 @@ class MainWindow(QtWidgets.QMainWindow):
     def call_ocio(self, *args):
         SetStylesheet(self.ocio_widget, theme=self.current_theme)
         self.ocio_widget.show()
+
+    def call_filter(self, *args):
+
+        # import importlib
+        # from viewline.widgets import filter
+        # importlib.reload(filter)
+        # from viewline.widgets.filter import ColorFilterWidget
+        # self.filter_widget = ColorFilterWidget(None)
+
+        SetStylesheet(self.filter_widget, theme=self.current_theme)
+        self.filter_widget.show()
 
     def reset_video_fps(self):
         """

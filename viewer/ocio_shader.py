@@ -24,12 +24,14 @@ Notes:
     All color conversion occurs on the GPU.
 """
 
+import PyOpenColorIO
+
 from PyOpenColorIO import Config
 from PyOpenColorIO import GPUProcessor
-from PyOpenColorIO import GPUShaderDesc
+from PyOpenColorIO import GpuShaderDesc
+from PyOpenColorIO import GpuLanguage
 
 from .gl_shader import GLShader
-
 
 VERTEX_SHADER = """
 #version 330 core
@@ -59,7 +61,8 @@ class OCIOShader(object):
                 Path to ocio configuration.
         """
 
-        self.config = Config.CreateFromFile(config_path)
+        # self.config = Config.CreateFromFile(config_path)
+        # self.config = PyOpenColorIO.Config.CreateFromFile(config_path)
 
         self.processor = None
         self.gpu_processor = None
@@ -70,7 +73,7 @@ class OCIOShader(object):
         self.display = None
         self.view = None
 
-    def build(self, input_space, display, view):
+    def _build(self, input_space, display, view):
         """
         Build GPU shader.
 
@@ -97,15 +100,54 @@ class OCIOShader(object):
         self.gpu_processor = processor.getDefaultGPUProcessor()
 
         # Build GLSL shader
-        shader_desc = GPUShaderDesc.CreateShaderDesc()
+        shader_desc = GpuShaderDesc.CreateShaderDesc()
 
-        shader_desc.setLanguage(GPUShaderDesc.LANGUAGE_GLSL_330_CORE)
+        shader_desc.setLanguage(GpuShaderDesc.LANGUAGE_GLSL_330_CORE)
 
         shader_desc.setFunctionName("OCIODisplay")
 
         self.gpu_processor.extractGpuShaderInfo(shader_desc)
 
         fragment = self.create_fragment_shader(shader_desc.getShaderText())
+
+        self.shader.compile(VERTEX_SHADER, fragment)
+
+    def build(self, ocio_processor):
+        """
+        Build GPU shader.
+
+        Args:
+            input_space (str):
+                Image color space.
+
+            display (str):
+                Display device.
+
+            view (str):
+                Display view.
+        """
+
+        # ctransform = ocio_processor.set_display_transform()
+
+        # Build display processor
+        # processor = ocio_processor.config.getProcessor(transform)
+
+        self.gpu_processor = ocio_processor.get_default_GPU_processor()
+
+        # Build GLSL shader
+        shader_desc = GpuShaderDesc.CreateShaderDesc()
+
+        shader_desc.setLanguage(GpuLanguage.GPU_LANGUAGE_GLSL_4_0)
+
+        shader_desc.setFunctionName("OCIODisplay")
+
+        self.gpu_processor.extractGpuShaderInfo(shader_desc)
+
+        fragment = self.create_fragment_shader(shader_desc.getShaderText())
+
+        print("\n11111111111++++++++++++++++++++++++++++")
+        print(fragment)
+        print("--------------------------------------------\n")
 
         self.shader.compile(VERTEX_SHADER, fragment)
 
@@ -141,7 +183,7 @@ class OCIOShader(object):
 
             FragColor = color;
         }}
-                    
+
         """
 
         codes = [
@@ -157,8 +199,18 @@ class OCIOShader(object):
             "\t\tuv",
             "\t);\n",
             "\tcolor = OCIODisplay(color);\n",
+            # "\tcolor.rgb *= vec3(0.0, 1.0, 0.0);",
             "\tFragColor = color;",
             "}}",
+        ]
+
+        _codes = [
+            "#version 330 core\n",
+            "out vec4 FragColor;\n",
+            "void main()",
+            "{",
+            "\tFragColor = vec4(1.0, 0.0, 0.0, 1.0);",
+            "}",
         ]
 
         return "\n".join(codes)
@@ -177,6 +229,41 @@ class OCIOShader(object):
         """Destroy OpenGL shader."""
 
         self.shader.destroy()
+
+    def uniform_location(self, name):
+        """Return uniform location."""
+
+        return self.shader.uniform_location(name)
+
+    def set_uniform_int(self, name, value):
+        """Set integer uniform."""
+
+        self.shader.set_uniform_int(name, value)
+
+    def set_uniform_float(self, name, value):
+        """Set float uniform."""
+
+        self.shader.set_uniform_float(name, value)
+
+    def set_uniform_vec2(self, name, x, y):
+        """Set vec2 uniform."""
+
+        self.shader.set_uniform_vec2(name, x, y)
+
+    def set_uniform_vec3(self, name, x, y, z):
+        """Set vec3 uniform."""
+
+        self.shader.set_uniform_vec3(name, x, y, z)
+
+    def set_uniform_vec4(self, name, value):
+        """Set vec4 uniform."""
+
+        self.shader.set_uniform_vec4(name, value)
+
+    def set_uniform_mat4(self, name, matrix):
+        """Set mat4 uniform."""
+
+        self.shader.set_uniform_mat4(name, matrix)
 
 
 if __name__ == "__main__":

@@ -47,13 +47,30 @@ class FullscreenQuad(object):
         vertices = numpy.array(
             [
                 # x     y      u     v
-                -1.0, -1.0, 0.0, 1.0,
-                1.0, -1.0, 1.0, 1.0,
-                1.0,  1.0, 1.0, 0.0,
-
-                -1.0, -1.0, 0.0, 1.0,
-                1.0,  1.0, 1.0, 0.0,
-                -1.0,  1.0, 0.0, 0.0,
+                -1.0,
+                -1.0,
+                0.0,
+                1.0,
+                1.0,
+                -1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                0.0,
+                -1.0,
+                -1.0,
+                0.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                0.0,
+                -1.0,
+                1.0,
+                0.0,
+                0.0,
             ],
             dtype=numpy.float32,
         )
@@ -88,13 +105,14 @@ class FullscreenQuad(object):
         """Release GPU resources."""
 
         if self.vbo:
-            GL.glDeleteBuffers(1,  [self.vbo])
+            GL.glDeleteBuffers(1, [self.vbo])
 
         if self.vao:
             GL.glDeleteVertexArrays(1, [self.vao])
 
         self.vbo = 0
         self.vao = 0
+
 
 if __name__ == "__main__":
     pass
