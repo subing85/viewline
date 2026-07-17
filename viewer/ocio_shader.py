@@ -33,6 +33,9 @@ from PyOpenColorIO import GpuLanguage
 
 from .gl_shader import GLShader
 
+from viewline import resources
+
+
 VERTEX_SHADER = """
 #version 330 core
 
@@ -73,45 +76,6 @@ class OCIOShader(object):
         self.display = None
         self.view = None
 
-    def _build(self, input_space, display, view):
-        """
-        Build GPU shader.
-
-        Args:
-            input_space (str):
-                Image color space.
-
-            display (str):
-                Display device.
-
-            view (str):
-                Display view.
-        """
-
-        self.input_space = input_space
-        self.display = display
-        self.view = view
-
-        # Build display processor
-        processor = self.config.getProcessor(input_space, display, view)
-
-        self.processor = processor
-
-        self.gpu_processor = processor.getDefaultGPUProcessor()
-
-        # Build GLSL shader
-        shader_desc = GpuShaderDesc.CreateShaderDesc()
-
-        shader_desc.setLanguage(GpuShaderDesc.LANGUAGE_GLSL_330_CORE)
-
-        shader_desc.setFunctionName("OCIODisplay")
-
-        self.gpu_processor.extractGpuShaderInfo(shader_desc)
-
-        fragment = self.create_fragment_shader(shader_desc.getShaderText())
-
-        self.shader.compile(VERTEX_SHADER, fragment)
-
     def build(self, ocio_processor):
         """
         Build GPU shader.
@@ -127,25 +91,18 @@ class OCIOShader(object):
                 Display view.
         """
 
-        # ctransform = ocio_processor.set_display_transform()
-
-        # Build display processor
-        # processor = ocio_processor.config.getProcessor(transform)
-
         self.gpu_processor = ocio_processor.get_default_GPU_processor()
 
         # Build GLSL shader
         shader_desc = GpuShaderDesc.CreateShaderDesc()
-
         shader_desc.setLanguage(GpuLanguage.GPU_LANGUAGE_GLSL_4_0)
-
         shader_desc.setFunctionName("OCIODisplay")
 
         self.gpu_processor.extractGpuShaderInfo(shader_desc)
-
         fragment = self.create_fragment_shader(shader_desc.getShaderText())
 
-        self.shader.compile(VERTEX_SHADER, fragment)
+        vertex_shader = resources.readVertexShader("display")
+        self.shader.compile(vertex_shader, fragment)
 
     def create_fragment_shader(self, ocio_shader):
         """
@@ -198,15 +155,6 @@ class OCIOShader(object):
             # "\tcolor.rgb *= vec3(0.0, 1.0, 0.0);",
             "\tFragColor = color;",
             "}}",
-        ]
-
-        _codes = [
-            "#version 330 core\n",
-            "out vec4 FragColor;\n",
-            "void main()",
-            "{",
-            "\tFragColor = vec4(1.0, 0.0, 0.0, 1.0);",
-            "}",
         ]
 
         return "\n".join(codes)

@@ -667,7 +667,6 @@ class GLViewer(QtOpenGLWidgets.QOpenGLWidget):
         self.ocio_processor = processor
 
         # Rebuild GPU shader if OpenGL already exists.
-        # if self.context() is not None:
         self.build_ocio_shader()
 
         self.update()
@@ -675,24 +674,15 @@ class GLViewer(QtOpenGLWidgets.QOpenGLWidget):
     def build_ocio_shader(self):
         """Build GPU OCIO shader."""
 
-        # if self.ocio_processor is None:
-        #    self.use_ocio = False
-        #    self.ocio_shader = None
-        #    return
-
-        # ocio_processor = OCIOProcessor(config_path="D:/works/developments/devkit/ocio/studio-config-v4.0.0_aces-v2.0_ocio-v2.5.ocio")
-        # ocio_processor.set_color_space("sRGB - Display")
-        # ocio_processor.set_display("sRGB - Display")
-        # ocio_processor.set_view("ACES 2.0 - SDR 100 nits (Rec.709)")
-
-        ocio_processor = self.ocio_processor
+        # if not self.ocio_processor:
+        #     return
 
         self.ocio_shader = OCIOShader(None)
-        self.ocio_shader.build(ocio_processor)
+        self.ocio_shader.build(self.ocio_processor)
 
         self.ocio_shader.release()
 
-        self.use_ocio = True
+        self.use_ocio = self.ocio_processor.enabled
 
     def display_changed(self, parameter):
         self.display_parameter = parameter

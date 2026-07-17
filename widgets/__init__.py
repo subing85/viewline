@@ -372,7 +372,6 @@ class MainWindow(QtWidgets.QMainWindow):
         # Load media into player
         self.player.load(filepath)
 
-        print("ggggggggggggggggggggg")
         self.reset_video_fps()
 
         # Sequence media supports AOVs

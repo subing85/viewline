@@ -149,5 +149,17 @@ def readShader(name):
     return vertex_source, fragment_source
 
 
+def readVertexShader(name):
+    """Return absolute vertex shader path."""
+
+    vertex_path = os.path.abspath(os.path.join(CURRENT_PATH, "shaders", f"{name}.vert"))
+
+    with open(vertex_path, "r", encoding="utf-8") as stream:
+        vertex_source = stream.read()
+
+    return vertex_source
+
+
+
 if __name__ == "__main__":
     pass
