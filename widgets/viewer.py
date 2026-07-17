@@ -1109,7 +1109,7 @@ class TimelineToolbarLayout(HorizontalLayout):
         """
 
         # Only applies to video media
-        if typed != "video":
+        if typed != "movie":
             return
 
         # Find matching FPS preset

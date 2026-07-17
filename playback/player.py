@@ -180,17 +180,26 @@ class MediaPlayer(BasePlayer):
     def reader(self):
         """Return active media reader."""
 
+        if not self.player:
+            return
+
         return self.player.reader
 
     @property
     def frame_count(self):
         """Return total timeline frames."""
 
+        if not self.player:
+            return
+
         return self.player.frame_count
 
     @property
     def is_playing(self):
         """Return playback state."""
+
+        if not self.player:
+            return
 
         return self.player.is_playing
 
@@ -202,20 +211,32 @@ class MediaPlayer(BasePlayer):
                 Volume percentage (0-100).
         """
 
+        if not self.player:
+            return
+
         self.player.volume_changed(value)
 
     def toggle_play_pause(self):
         """Toggle playback state."""
+
+        if not self.player:
+            return
 
         self.player.toggle_play_pause()
 
     def backward_frame(self):
         """Step backward one frame."""
 
+        if not self.player:
+            return
+
         self.player.backward_frame()
 
     def forward_frame(self):
         """Step forward one frame."""
+
+        if not self.player:
+            return
 
         self.player.forward_frame()
 
@@ -227,6 +248,9 @@ class MediaPlayer(BasePlayer):
                 Media FPS value.
         """
 
+        if not self.player:
+            return
+
         self.player.set_fps(fps)
 
     def set_loop(self, enabled):
@@ -236,6 +260,9 @@ class MediaPlayer(BasePlayer):
             enabled (bool):
                 Loop playback state.
         """
+
+        if not self.player:
+            return
 
         self.player.set_loop(enabled)
 
@@ -247,6 +274,9 @@ class MediaPlayer(BasePlayer):
                 Target timeline frame.
         """
 
+        if not self.player:
+            return
+
         self.player.seek(frame)
 
     def set_aov(self, aov):
@@ -256,6 +286,9 @@ class MediaPlayer(BasePlayer):
             aov (str):
                 AOV name.
         """
+
+        if not self.player:
+            return
 
         self.player.set_aov(aov)
 
@@ -276,13 +309,17 @@ class MediaPlayer(BasePlayer):
                 OCIO view.
         """
 
+        if not self.player:
+            return
+
         if self.player:
             self.player.set_ocio(processor, input_space, display, view)
-        else:
-            self.ocio_processor = processor
-            self.input_space = input_space
-            self.display = display
-            self.view = view
+        
+        # else:
+        #     self.ocio_processor = processor
+        #    self.input_space = input_space
+        #    self.display = display
+        #    self.view = view
 
 
 class SequencePlayer(BasePlayer):
