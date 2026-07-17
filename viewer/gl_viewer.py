@@ -242,10 +242,6 @@ class GLViewer(QtOpenGLWidgets.QOpenGLWidget):
         if self.frame is None:
             return
 
-        # Upload image to GPU texture.
-        # Future:
-        #     Upload only when frame changes.
-
         self.texture.upload(self.frame)
 
         # Calculate display rectangle.
@@ -253,8 +249,6 @@ class GLViewer(QtOpenGLWidgets.QOpenGLWidget):
 
         # Bind texture.
         self.texture.bind(0)
-
-        # self.use_ocio = False
 
         if self.use_ocio:
             self.active_shader = self.ocio_shader
@@ -264,16 +258,29 @@ class GLViewer(QtOpenGLWidgets.QOpenGLWidget):
         # Use texture shader.
         self.active_shader.bind()
 
-        # Texture unit.
-        self.active_shader.set_uniform_int("imageTexture", 0)
+        dpr = self.devicePixelRatioF()
 
-        # Viewport size.
+        viewport_width = int(self.width() * dpr)
+        viewport_height = int(self.height() * dpr)
+
+        # Physical OpenGL viewport size.
         self.active_shader.set_uniform_vec2(
-            "viewportSize", float(self.width()), float(self.height())
+            "viewportSize", float(viewport_width), float(viewport_height),
         )
 
-        # Image size.
-        self.active_shader.set_uniform_vec2("imageSize", self.image_width, self.image_height)
+        # Fitted image rectangle.
+        self.active_shader.set_uniform_vec4(
+            "displayRect",
+            (
+                float(self.display_rect.left()),
+                float(self.display_rect.top()),
+                float(self.display_rect.width()),
+                float(self.display_rect.height()),
+            ),
+        )
+
+        # Texture unit.
+        self.active_shader.set_uniform_int("imageTexture", 0)
 
         if self.display_parameter:
             self.active_shader.set_uniform_float(
@@ -305,16 +312,7 @@ class GLViewer(QtOpenGLWidgets.QOpenGLWidget):
                 self.filter_parameter.control, self.filter_parameter.value
             )
 
-        # Display rectangle.
-        self.active_shader.set_uniform_vec4(
-            "displayRect",
-            (
-                self.display_rect.left(),
-                self.display_rect.top(),
-                self.display_rect.width(),
-                self.display_rect.height(),
-            ),
-        )
+
 
         # Draw fullscreen quad.
         self.quad.draw()

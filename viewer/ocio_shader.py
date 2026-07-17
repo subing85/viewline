@@ -145,10 +145,6 @@ class OCIOShader(object):
 
         fragment = self.create_fragment_shader(shader_desc.getShaderText())
 
-        print("\n11111111111++++++++++++++++++++++++++++")
-        print(fragment)
-        print("--------------------------------------------\n")
-
         self.shader.compile(VERTEX_SHADER, fragment)
 
     def create_fragment_shader(self, ocio_shader):
