@@ -41,6 +41,7 @@ No glDrawPixels() is used.
 
 from __future__ import annotations
 
+import av
 import numpy
 
 from OpenGL import GL
@@ -101,11 +102,12 @@ class GLViewer(QtOpenGLWidgets.QOpenGLWidget):
 
         # Current image.
 
-        self.frame = None
+        self.numpy_frame = None
 
         # Image size.
         self.image_width = 0
         self.image_height = 0
+        self.channels = None
 
         # Display rectangle.
         self.display_rect = QtCore.QRect()
@@ -179,14 +181,15 @@ class GLViewer(QtOpenGLWidgets.QOpenGLWidget):
         """
 
         # Store frame.
-        self.frame = frame
+        self.numpy_frame = frame
 
         if frame is None:
             return
-
+    
         # Image size.
-        self.image_width = frame.width
-        self.image_height = frame.height
+        # self.image_width = frame.width
+        # self.image_height = frame.height
+        self.image_height, self.image_width, self.channels = frame.shape
 
         # Texture upload happens inside paintGL().
         self.update()
@@ -194,7 +197,7 @@ class GLViewer(QtOpenGLWidgets.QOpenGLWidget):
     def clear(self):
         """Clear viewer."""
 
-        self.frame = None
+        self.numpy_frame = None
 
         # self.texture.clear()
 
@@ -233,10 +236,10 @@ class GLViewer(QtOpenGLWidgets.QOpenGLWidget):
         GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
 
         # Nothing to draw.
-        if self.frame is None:
+        if self.numpy_frame is None:
             return
 
-        self.texture.upload(self.frame)
+        self.texture.upload(self.numpy_frame)
 
         # Calculate display rectangle.
         self.update_display_rect()
@@ -306,8 +309,6 @@ class GLViewer(QtOpenGLWidgets.QOpenGLWidget):
                 self.filter_parameter.control, self.filter_parameter.value
             )
 
-
-
         # Draw fullscreen quad.
         self.quad.draw()
 
@@ -319,12 +320,11 @@ class GLViewer(QtOpenGLWidgets.QOpenGLWidget):
 
         # Draw overlays.
         self.draw_overlay()
-        # self.set_ocio(None)
 
     def update_display_rect(self):
         """Calculate fitted display rectangle."""
 
-        if self.frame is None:
+        if self.numpy_frame is None:
             return
 
         # Device scale.
@@ -603,11 +603,11 @@ class GLViewer(QtOpenGLWidgets.QOpenGLWidget):
             QImage
         """
 
-        if self.frame is None:
+        if self.numpy_frame is None:
             return None
 
         # Convert AVFrame -> RGB NumPy image.
-        frame = self.frame.to_ndarray(format="rgb24")
+        frame = self.numpy_frame.to_ndarray(format="rgb24")
         frame = numpy.ascontiguousarray(frame)
 
         height, width, channels = frame.shape
@@ -627,11 +627,9 @@ class GLViewer(QtOpenGLWidgets.QOpenGLWidget):
             ).copy()
 
         painter = QtGui.QPainter(image)
-
         self.annotations.set_frame(self.current_frame)
 
         image_rect = QtCore.QRect(0, 0, width, height)
-
         self.annotations.draw(
             painter,
             point_converter=lambda point: QtCore.QPointF(

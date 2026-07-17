@@ -33,6 +33,7 @@ Typical Usage:
     ...
 """
 
+import av
 import numpy
 
 from OpenGL import GL
@@ -104,7 +105,7 @@ class GLTexture(object):
         self.width = 0
         self.height = 0
 
-    def upload(self, frame):
+    def upload(self, image):
         """Upload image pixels.
 
         Args:
@@ -121,7 +122,9 @@ class GLTexture(object):
         if not self.texture:
             self.create()
 
-        image = frame.to_ndarray(format="rgb24")
+        if isinstance(image, av.VideoFrame):
+            image = image.to_ndarray(format="rgb24")
+
         image = numpy.ascontiguousarray(image)
 
         height, width = image.shape[:2]

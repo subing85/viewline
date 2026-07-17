@@ -600,7 +600,7 @@ class SequencePlayer(BasePlayer):
         if not aov:
             return
 
-        # Store Current AOV
+          # Store Current AOV
         self.current_aov = aov
 
         # Reset Frame Cache
@@ -759,9 +759,7 @@ class SequencePlayer(BasePlayer):
             frame = self.cache.cache[self.current_frame]
         else:  # Read From Media Reader
             frame = self.reader.get_frame(
-                self.current_frame,
-                aov=self.current_aov,
-                ocio_processor=self.ocio_processor,
+                self.current_frame, aov=self.current_aov
             )
 
         # Store Frame Into Cache
@@ -1017,7 +1015,11 @@ class MoviePlayer(BasePlayer):
         self.audio_player.flush()
 
         # Display the requested frame immediately.
+
         self.display_video_frame(video_frame)
+
+        # numpy_frame = video_frame.to_ndarray(format="rgb24")
+        # self.display_video_frame(numpy_frame)
 
         # Decode upcoming packets ready for playback.
         self.fill_movie_queue()
@@ -1136,65 +1138,17 @@ class MoviePlayer(BasePlayer):
             # Display the decoded frame.
             self.display_video_frame(frame)
 
-    def display_video_frame_v1(self, frame):
-        """Display a decoded video frame.
-
-        Converts a decoded PyAV video frame into an RGB image suitable for display, optionally applies an OpenColorIO display transform,
-        determines the corresponding timeline frame number, and emits playback signals for the viewer.
-
-        Playback flow:
-            1. Convert the decoded frame into an RGB image.
-            2. Apply the active OCIO display transform (optional).
-            3. Convert playback time into a timeline frame.
-            4. Emit the image for display.
-            5. Notify the timeline of the current frame.
-
-        Args:
-            frame (av.VideoFrame):
-                Decoded video frame.
-
-        Emits:
-            frame_ready (numpy.ndarray):
-                Image buffer ready for display.
-
-            frame_changed (int):
-                Current timeline frame number.
-
-        Notes:
-            Timeline frame numbers are calculated from the movie presentation timestamp (PTS) rather than decoder order,
-            ensuring accurate synchronization with playback time.
-        """
-
-        # Convert the decoded video frame into an RGB NumPy image.
-        image = frame.to_ndarray(format="rgb24")
-
-        # Apply the active OCIO display transform when enabled.
-        if self.ocio_processor:
-            # Convert the image into floating-point values expected by OCIO.
-            image = image.astype(numpy.float32) / 255.0
-
-            # Apply the configured display transform.
-            image = self.ocio_processor.process_image(image)
-
-            # Convert the processed image back to 8-bit RGB.
-            image = (numpy.clip(image, 0.0, 1.0) * 255.0).astype(numpy.uint8)
-
-        # Convert playback time into the corresponding timeline frame.
-        frame_number = self.start_frame + round(frame.time * self.reader.get_fps())
-
-        # Send the image to the viewer.
-        self.frame_ready.emit(image)
-
-        # Send the image to the viewer.
-        self.frame_changed.emit(frame_number)
-
     def display_video_frame(self, frame):
         """Emit decoded AVFrame."""
 
         frame_number = self.start_frame + round(frame.time * self.reader.get_fps())
 
+
         # Send AVFrame directly.
-        self.frame_ready.emit(frame)
+        # self.frame_ready.emit(frame)
+
+        numpy_frame = frame.to_ndarray(format="rgb24")
+        self.frame_ready.emit(numpy_frame)
 
         self.frame_changed.emit(frame_number)
 

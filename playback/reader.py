@@ -190,33 +190,6 @@ class MovieReader(object):
                 for frame in packet.decode():
                     return ("audio", frame)
 
-    def _next_packet(self):
-        """
-        Return the next decoded media frame.
-
-        Returns:
-            tuple[str, av.Frame] | None:
-                ("video", frame), ("audio", frame), or None when EOF.
-        """
-
-        while True:
-            # Return already-decoded frames first.
-            if self.pending_frames:
-                return self.pending_frames.pop(0)
-
-            try:
-                packet = next(self.packet_generator)
-            except StopIteration:
-                return None
-
-            if packet.stream == self.video_stream:
-                for frame in packet.decode():
-                    self.pending_frames.append(("video", frame))
-
-            elif self.audio_stream and packet.stream == self.audio_stream:
-                for frame in packet.decode():
-                    self.pending_frames.append(("audio", frame))
-
     def seek_time(self, seconds):
         """
         Seek to a playback time.
@@ -514,7 +487,7 @@ class SequenceReader(object):
 
         return len(self.files)
 
-    def get_fps(self, rounded=0):
+    def get_fps(self, rounded=2):
         """Return playback FPS.
 
         Returns:
@@ -547,7 +520,7 @@ class SequenceReader(object):
 
         self.fps = fps or self.fps
 
-    def get_frame(self, current_frame, aov="rgb", ocio_processor=None):
+    def get_frame(self, current_frame, aov="rgb"):
         """Read image frame from sequence.
 
         Args:
@@ -626,8 +599,8 @@ class SequenceReader(object):
             image = numpy.repeat(image, 3, axis=2)
 
         # Add OCIO
-        if ocio_processor and ocio_processor.enabled:
-            image = ocio_processor.process_image(image)
+        # if ocio_processor and ocio_processor.enabled:
+        #     image = ocio_processor.process_image(image)
 
         # Convert Float Image To Preview Image
         image = numpy.clip(image, 0.0, 1.0)

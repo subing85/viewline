@@ -390,6 +390,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.openMedia()
 
     def call_ocio(self, *args):
+        # import importlib
+        # from viewline.widgets import ocio
+        # importlib.reload(ocio)
+        # from viewline.widgets.ocio import OcioWidget
+        # self.ocio_widget = OcioWidget(None)
+
         SetStylesheet(self.ocio_widget, theme=self.current_theme)
         self.ocio_widget.show()
 
