@@ -283,7 +283,7 @@ class MovieReader(object):
 
         return self.frame_table[frame_index]["pts"]
 
-    def get_fps(self, rounded=0):
+    def get_fps(self, rounded=2):
         """
         Return the movie frame rate.
 
@@ -301,6 +301,7 @@ class MovieReader(object):
         if rounded == 0:
             return fps
         result = round(fps, rounded)
+
         return result
 
     def frame_count(self):
@@ -323,7 +324,8 @@ class MovieReader(object):
                 Duration in seconds.
         """
 
-        return float(self.container.duration / 1000000)
+        # return float(self.container.duration / 1000000)
+        return float(self.video_stream.duration * self.video_stream.time_base)
 
     def sample_rate(self):
         """

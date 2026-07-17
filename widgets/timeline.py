@@ -98,6 +98,7 @@ class TimelineWidget(QtWidgets.QWidget):
         self.timeline_margin = 50
         self.start_frame = constants.VL_START_FRAME
         self.end_frame = constants.VL_START_FRAME + constants.VL_DEFAULT_FRAMES
+
         self.current_frame = constants.VL_START_FRAME
 
         # Cached frame storage

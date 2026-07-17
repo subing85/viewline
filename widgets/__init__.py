@@ -372,6 +372,8 @@ class MainWindow(QtWidgets.QMainWindow):
         # Load media into player
         self.player.load(filepath)
 
+        self.reset_video_fps()
+
         # Sequence media supports AOVs
         self.viewframe.viewToolbarLayout.set_aovs(
             self.player.reader.media_type, self.player.reader.get_available_aovs()
@@ -409,9 +411,13 @@ class MainWindow(QtWidgets.QMainWindow):
         if not self.player.reader:
             return
 
+        # print(self.player.reader.media_type)
+
         # Only applies to video playback
-        if self.player.reader.media_type != "video":
+        if self.player.reader.media_type != "movie":
             return
+
+       #  print("\nfps", self.player.reader.get_fps(rounded=3))
 
         self.viewframe.timelineToolbarLayout.reset_fps(
             self.player.reader.media_type, self.player.reader.get_fps(rounded=3)

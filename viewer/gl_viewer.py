@@ -54,15 +54,14 @@ from viewline import utils
 from viewline import logger
 from viewline import constants
 
-from .fullscreen_quad import FullscreenQuad
 from .gl_shader import GLShader
 from .gl_texture import GLTexture
+from .screen import FullscreenQuad
 from .ocio_shader import OCIOShader
+
 
 from viewline.widgets.annotations import Sketch
 
-
-from viewline.ocio import OCIOProcessor
 
 LOGGER = logger.getLogger(__name__)
 
@@ -90,12 +89,7 @@ class GLViewer(QtOpenGLWidgets.QOpenGLWidget):
 
         self.set_samples(constants.VIEWER_SAMPLES_RATE)
 
-        # self.ocio_processor = OCIOProcessor(config_path="D:/works/developments/devkit/ocio/studio-config-v4.0.0_aces-v2.0_ocio-v2.5.ocio")
         self.ocio_processor = None
-
-        # self.ocio_processor.set_color_space("ACEScg")
-        # self.ocio_processor.set_display("sRGB - Display")
-        # self.ocio_processor.set_view("ACES 2.0 - SDR 100 nits (Rec.709)")
 
         # OpenGL resources.
 
