@@ -10,8 +10,6 @@ def main():
     Application entry point.
     """
 
-    import os
-
     app = QtWidgets.QApplication(sys.argv)
 
     window = MainWindow()
