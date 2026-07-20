@@ -390,22 +390,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.openMedia()
 
     def call_ocio(self, *args):
-        # import importlib
-        # from viewline.widgets import ocio
-        # importlib.reload(ocio)
-        # from viewline.widgets.ocio import OcioWidget
-        # self.ocio_widget = OcioWidget(None)
-
         SetStylesheet(self.ocio_widget, theme=self.current_theme)
         self.ocio_widget.show()
 
     def call_filter(self, *args):
-
-        # import importlib
-        # from viewline.widgets import filter
-        # importlib.reload(filter)
-        # from viewline.widgets.filter import ColorFilterWidget
-        # self.filter_widget = ColorFilterWidget(None)
 
         SetStylesheet(self.filter_widget, theme=self.current_theme)
         self.filter_widget.show()
@@ -543,6 +531,21 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Apply stylesheet theme
         SetStylesheet(self, theme=self.current_theme)
+
+        if self.ocio_widget:
+            SetStylesheet(self.ocio_widget, theme=self.current_theme)
+
+        if self.filter_widget:
+            SetStylesheet(self.filter_widget, theme=self.current_theme)
+
+    def closeEvent(self, event):
+        if self.ocio_widget:
+            self.ocio_widget.close()
+
+        if self.filter_widget:
+            self.filter_widget.close()
+
+        event.accept()
 
     def help(self):
         """

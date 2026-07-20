@@ -590,14 +590,11 @@ class Sketch(object):
         if self.current_frame is None:
             return
 
-        # painter.setCompositionMode(QtGui.QPainter.CompositionMode_SourceOver)
-        # painter.setRenderHint(QtGui.QPainter.Antialiasing)
-        # painter.setRenderHint(QtGui.QPainter.SmoothPixmapTransform)
-        # painter.setRenderHint(QtGui.QPainter.TextAntialiasing)
-
-        # painter.setRenderHint(QtGui.QPainter.Antialiasing, True)
-        # painter.setRenderHint(QtGui.QPainter.TextAntialiasing, True)
-        # painter.setRenderHint(QtGui.QPainter.SmoothPixmapTransform, True)
+        # Enable render quality
+        painter.setCompositionMode(QtGui.QPainter.CompositionMode_SourceOver)
+        painter.setRenderHint(QtGui.QPainter.Antialiasing, True)
+        painter.setRenderHint(QtGui.QPainter.SmoothPixmapTransform, True)
+        painter.setRenderHint(QtGui.QPainter.TextAntialiasing, True)
 
         # Retrieve strokes for current frame
         strokes = self.get_strokes()
