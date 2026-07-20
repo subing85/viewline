@@ -289,7 +289,7 @@ class OutputWidget(QtWidgets.QScrollArea):
             valid, result = Review.get(self.context, reverse=True)
 
         if not valid:
-            LOGGER.warning("Couild not find valid task")
+            LOGGER.warning("Could not find valid task")
             return
 
         # Create Submission Widgets

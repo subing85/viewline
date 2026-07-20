@@ -212,13 +212,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.viewframe.viewToolbarLayout.aov_changed.connect(self.player.set_aov)
 
         self.viewframe.viewToolbarLayout.thicknes_changed.connect(
-            self.viewframe.viewer.annotations.set_thickness
+            self.viewframe.viewer.sketch.set_thickness
         )
         self.viewframe.viewToolbarLayout.radius_changed.connect(
-            self.viewframe.viewer.annotations.set_eraser_radius
+            self.viewframe.viewer.sketch.set_eraser_radius
         )
         self.viewframe.viewToolbarLayout.color_changed.connect(
-            self.viewframe.viewer.annotations.set_color
+            self.viewframe.viewer.sketch.set_color
         )
 
         self.viewframe.viewToolbarLayout.draw_enabled.connect(self.set_draw_enabled)
@@ -323,7 +323,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Build watermark resources
         logs = {
-            "project_logo": self.current_project["image"],
+            "project_logo": PathPixmap(self.current_project["image"]),
             "studio_logo": PathPixmap(resources.getIconFilepath(constants.STUDIO_NAME)),
         }
 

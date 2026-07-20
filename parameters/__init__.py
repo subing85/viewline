@@ -297,7 +297,7 @@ class FilterSettings(object):
         return [
             self.sharpen,
             self.blur,
-            self.motion_blur,
+            # temporarily blocked self.motion_blur,
             self.noise,
             self.denoiser,
         ]

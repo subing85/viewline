@@ -1507,25 +1507,25 @@ class Sketch(object):
         font = Font(None, **font_data)
         painter.setFont(font)
 
-        # Text colors
-        fill_color = QtGui.QColor(*font_data.get("fillColor", (255, 255, 255)))
-        stroke_color = QtGui.QColor(*font_data.get("strokeColor", (0, 0, 0)))
-
-        stroke_width = font_data.get("stroke", 2)
-
         # Build text path
         path = QtGui.QPainterPath()
         path.addText(x, y, font, text)
 
+        stroke_width = font_data.get("stroke", 2)
+
         # Draw text stroke
         if stroke_width > 0:
-            pen = StrokePen(stroke["color"], thickness=stroke_width)
+            stroke_color = font_data.get("strokeColor", (0, 0, 0))
+            pen = StrokePen(stroke_color, thickness=stroke_width)
             painter.setPen(pen)
             painter.strokePath(path, pen)
 
         # Set text opacity
         opacity = font_data.get("opacity", 1.0)
         painter.setOpacity(opacity)
+
+        # Text colors
+        fill_color = QtGui.QColor(*font_data.get("fillColor", (255, 255, 255)))
 
         # Draw text fill
         painter.fillPath(path, fill_color)

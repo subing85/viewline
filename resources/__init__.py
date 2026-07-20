@@ -136,12 +136,12 @@ def readJsonFile(filepath):
 def readShader(name):
     """Return absolute shader path."""
 
-    vertex_path = os.path.abspath(os.path.join(CURRENT_PATH, "shaders", f"{name}.vert"))
+    vertex_path = os.path.abspath(os.path.join(CURRENT_PATH, "materials", f"{name}.vert"))
 
     with open(vertex_path, "r", encoding="utf-8") as stream:
         vertex_source = stream.read()
 
-    fragment_path = os.path.abspath(os.path.join(CURRENT_PATH, "shaders", f"{name}.frag"))
+    fragment_path = os.path.abspath(os.path.join(CURRENT_PATH, "materials", f"{name}.frag"))
 
     with open(fragment_path, "r", encoding="utf-8") as stream:
         fragment_source = stream.read()
@@ -152,7 +152,7 @@ def readShader(name):
 def readVertexShader(name):
     """Return absolute vertex shader path."""
 
-    vertex_path = os.path.abspath(os.path.join(CURRENT_PATH, "shaders", f"{name}.vert"))
+    vertex_path = os.path.abspath(os.path.join(CURRENT_PATH, "materials", f"{name}.vert"))
 
     with open(vertex_path, "r", encoding="utf-8") as stream:
         vertex_source = stream.read()

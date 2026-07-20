@@ -6,9 +6,9 @@ from PySide6 import QtWidgets
 
 from viewline import constants
 
-from viewer.display import StyleSettings
-from viewer.display import FilterSettings
-from viewer.display import DisplaySettings
+from parameters import StyleSettings
+from parameters import FilterSettings
+from parameters import DisplaySettings
 
 
 from viewline.widgets.buttons import TextButton
