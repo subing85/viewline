@@ -314,7 +314,7 @@ class MediaPlayer(BasePlayer):
 
         if self.player:
             self.player.set_ocio(processor, input_space, display, view)
-        
+
         # else:
         #     self.ocio_processor = processor
         #    self.input_space = input_space
@@ -600,7 +600,7 @@ class SequencePlayer(BasePlayer):
         if not aov:
             return
 
-          # Store Current AOV
+        # Store Current AOV
         self.current_aov = aov
 
         # Reset Frame Cache
@@ -758,9 +758,7 @@ class SequencePlayer(BasePlayer):
         if self.cache.cache and self.current_frame in self.cache.cache:
             frame = self.cache.cache[self.current_frame]
         else:  # Read From Media Reader
-            frame = self.reader.get_frame(
-                self.current_frame, aov=self.current_aov
-            )
+            frame = self.reader.get_frame(self.current_frame, aov=self.current_aov)
 
         # Store Frame Into Cache
         self.cache.add(self.current_frame, frame)
@@ -1001,7 +999,7 @@ class MoviePlayer(BasePlayer):
         if video_frame is None:
             self.is_end_frame = True
             return
-        
+
         self.is_end_frame = False
 
         # Synchronize the playback clock with the decoded frame.
@@ -1142,7 +1140,6 @@ class MoviePlayer(BasePlayer):
         """Emit decoded AVFrame."""
 
         frame_number = self.start_frame + round(frame.time * self.reader.get_fps())
-
 
         # Send AVFrame directly.
         # self.frame_ready.emit(frame)

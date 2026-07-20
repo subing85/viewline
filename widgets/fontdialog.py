@@ -63,6 +63,8 @@ from PySide6 import QtGui
 from PySide6 import QtCore
 from PySide6 import QtWidgets
 
+from viewline import constants
+
 from viewline.widgets.buttons import TextButton
 from viewline.widgets.buttons import ColorButton
 from viewline.widgets.buttons import TextToolButton
@@ -157,7 +159,9 @@ class TxtInputDialog(QtWidgets.QDialog):
         self.horizontallayout.addWidget(self.strikeButton)
 
         # Text color button
-        self.colorButton = ColorButton(self)
+        self.colorButton = ColorButton(
+            self, tooltip="Pick Color", color=constants.DEFAULT_SKETCH_COLOR, width=22, height=22
+        )
         self.colorButton.setText("T")
         self.horizontallayout.addWidget(self.colorButton)
 

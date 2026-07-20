@@ -35,7 +35,6 @@ from .gl_shader import GLShader
 
 from viewline import resources
 
-
 VERTEX_SHADER = """
 #version 330 core
 

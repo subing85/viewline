@@ -160,6 +160,5 @@ def readVertexShader(name):
     return vertex_source
 
 
-
 if __name__ == "__main__":
     pass

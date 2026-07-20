@@ -334,7 +334,6 @@ class OcioWidget(QtWidgets.QWidget):
 
         # Refresh available view value when the selected view changes.
         self.viewCombobox.currentIndexChanged.connect(self.view_index_changed)
-        
 
     def setupIcons(self):
         """
@@ -626,7 +625,6 @@ class OcioWidget(QtWidgets.QWidget):
         self.ocio_processor.set_view(view)
 
         self.set_config()
-
 
     def set_config(self):
         """

@@ -84,10 +84,9 @@ class ColorFilterWidget(QtWidgets.QWidget):
 
         pixmap = NamePixmapIcon(constants.VL_COLOR_FILTER_TOOL_ICON)
         self.setWindowIcon(pixmap)
-    
+
     def reset(self):
         self.stylesWidget.reset_all()
-
 
 
 class DisplayWidget(QtWidgets.QWidget):
