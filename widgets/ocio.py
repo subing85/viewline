@@ -49,24 +49,30 @@ Example:
 
 from __future__ import absolute_import
 
-import utils
-
 from PySide6 import QtCore
 from PySide6 import QtWidgets
 
-from widgets.labels import RightLabel
-from widgets.buttons import TextButton
-from widgets.dialogs import FileDialog
-from widgets.lineedits import InputLineEdit
+from viewline import utils
+from viewline import logger
+from viewline import constants
 
-from widgets.layouts import GridLayout
-from widgets.layouts import VerticalLayout
-from widgets.layouts import HorizontalSpacer
-from widgets.layouts import HorizontalLayout
 
-from widgets.comboboxs import NormalCombobox
+from viewline.widgets.labels import RightLabel
+from viewline.widgets.buttons import TextButton
+from viewline.widgets.dialogs import FileDialog
+from viewline.widgets.pixmaps import NamePixmapIcon
+from viewline.widgets.lineedits import InputLineEdit
 
-from ocio import OCIOProcessor
+from viewline.widgets.layouts import GridLayout
+from viewline.widgets.layouts import VerticalLayout
+from viewline.widgets.layouts import HorizontalSpacer
+from viewline.widgets.layouts import HorizontalLayout
+
+from viewline.widgets.comboboxs import NormalCombobox
+
+from viewline.ocio import OCIOProcessor
+
+LOGGER = logger.getLogger(__name__)
 
 
 class OcioWidget(QtWidgets.QWidget):
@@ -137,7 +143,8 @@ class OcioWidget(QtWidgets.QWidget):
     """
 
     # ocio parameter chanage signals
-    ocio_changed = QtCore.Signal(object, str, str, str)
+    # ocio_changed = QtCore.Signal(object, str, str, str)
+    ocio_changed = QtCore.Signal(object)
 
     def __init__(self, parent, *args, **kwargs):
         """
@@ -198,6 +205,8 @@ class OcioWidget(QtWidgets.QWidget):
 
         # Build the complete graphical interface.
         self.setupUi()
+
+        self.setupIcons()
 
     def setupUi(self):
         """
@@ -296,8 +305,8 @@ class OcioWidget(QtWidgets.QWidget):
         self.horizontalayout2.addWidget(self.closeButton)
 
         # Add the button.
-        self.applyButton = TextButton(self, label="Apply")
-        self.horizontalayout2.addWidget(self.applyButton)
+        # self.applyButton = TextButton(self, label="Apply")
+        # self.horizontalayout2.addWidget(self.applyButton)
 
         # Disable all OCIO controls until the feature is explicitly enabled by the user.
         self.set_enabled(False)
@@ -305,20 +314,34 @@ class OcioWidget(QtWidgets.QWidget):
         # Signal Connections
         self.configCheckBox.stateChanged.connect(self.set_enabled)
 
-        # Refresh available views whenever the selected display changes.
-        self.displayCombobox.currentIndexChanged.connect(self.display_index_changed)
-
         # Browse for a new OCIO configuration.
         self.configButton.clicked.connect(self.set_config_path)
 
         # Apply the selected OCIO configuration.
-        self.applyButton.clicked.connect(self.set_config)
+        # self.applyButton.clicked.connect(self.set_config)
 
         # Close the dialog.
         self.closeButton.clicked.connect(self.close)
 
         # Load the current OCIO configuration and populate all comboboxes.
         self.reload_config()
+
+        # Refresh available display and views whenever the selected color space changes.
+        self.colorSpaceCombobox.currentIndexChanged.connect(self.color_index_changed)
+
+        # Refresh available views whenever the selected display changes.
+        self.displayCombobox.currentIndexChanged.connect(self.display_index_changed)
+
+        # Refresh available view value when the selected view changes.
+        self.viewCombobox.currentIndexChanged.connect(self.view_index_changed)
+
+    def setupIcons(self):
+        """
+        Setup the main window icon.
+        """
+
+        pixmap = NamePixmapIcon(constants.VL_OCIO_TOOL_ICON)
+        self.setWindowIcon(pixmap)
 
     def set_enabled(self, state):
         """
@@ -373,6 +396,9 @@ class OcioWidget(QtWidgets.QWidget):
         # Enable or disable every OCIO-related widget.
         for widget in widgets:
             widget.setEnabled(state)
+
+        self.ocio_processor.set_enabled(bool(state))
+        self.set_config()
 
     def set_config_path(self):
         """
@@ -482,6 +508,9 @@ class OcioWidget(QtWidgets.QWidget):
         # Create a new OCIO processor using the currently selected configuration file.    #
         self.ocio_processor = OCIOProcessor(self.config_path)
 
+        enable = True if self.configCheckBox.isChecked() else False
+        self.ocio_processor.set_enabled(enable)
+
         # Query all available input color spaces from the loaded OCIO configuration.
         color_spaces = self.ocio_processor.get_color_spaces()
 
@@ -495,48 +524,27 @@ class OcioWidget(QtWidgets.QWidget):
         # Changing the current display automatically emits currentIndexChanged(), which updates the View combobox via display_index_changed().
         self.displayCombobox.setItems(displays)
 
-    def set_views(self):
-        """
-        Populate the View combobox for the selected display.
-
-        Queries all available display views associated with the currently selected display and updates the View combobox.
-
-        Responsibilities:
-            - Read the current display selection
-            - Query available display views
-            - Populate the View combobox
-
-        Returns:
-            None
-
-        Notes:
-            Available views are display-dependent.
-
-            Every display may expose a different set of views defined by the active OpenColorIO configuration.
-
-        Architecture:
-            Display Combobox
-                    ↓
-            Current Display
-                    ↓
-            OCIOProcessor.get_views()
-                    ↓
-            View List
-                    ↓
-            View Combobox
-
-        Example:
-            >>> self.set_views()
-        """
-
-        # Retrieve the currently selected display.
-        display = self.displayCombobox.getValue()
-
         # Query all available views for the selected display from the OCIO configuration.
-        views = self.ocio_processor.get_views(display)
+        views = self.ocio_processor.get_views(displays[0])
 
         # Populate the View combobox with the available display views.
         self.viewCombobox.setItems(views)
+
+        self.ocio_processor.set_color_space(color_spaces[0])
+        self.ocio_processor.set_display(displays[0])
+        self.ocio_processor.set_view(views[0])
+
+    def color_index_changed(self, *args):
+        color_space = self.colorSpaceCombobox.getValue()
+
+        if not color_space:
+            return
+
+        displays = self.ocio_processor.get_displays()
+        self.displayCombobox.setItems(displays)
+
+        self.ocio_processor.set_color_space(color_space)
+        self.ocio_processor.set_display(displays[0])
 
     def display_index_changed(self, *args):
         """
@@ -587,7 +595,36 @@ class OcioWidget(QtWidgets.QWidget):
         """
 
         # Refresh the available views for the newly selected display.
-        self.set_views()
+
+        display = self.displayCombobox.getValue()
+        if not display:
+            return
+
+        views = self.ocio_processor.get_views(display)
+
+        self.viewCombobox.setItems(views)
+
+        color_space = self.colorSpaceCombobox.getValue()
+
+        self.ocio_processor.set_color_space(color_space)
+        self.ocio_processor.set_display(display)
+        self.ocio_processor.set_view(views[0])
+
+        # self.set_config()
+
+    def view_index_changed(self, *args):
+        view = self.viewCombobox.getValue()
+        if not view:
+            return
+
+        color_space = self.colorSpaceCombobox.getValue()
+        display = self.displayCombobox.getValue()
+
+        self.ocio_processor.set_color_space(color_space)
+        self.ocio_processor.set_display(display)
+        self.ocio_processor.set_view(view)
+
+        self.set_config()
 
     def set_config(self):
         """
@@ -641,26 +678,14 @@ class OcioWidget(QtWidgets.QWidget):
             >>> self.set_config()
         """
 
-        # Determine whether OCIO processing is enabled.
-        enable = self.configCheckBox.isChecked()
-
-        # Retrieve the selected input color space.
-        color_space = self.colorSpaceCombobox.getValue()
-
-        # Retrieve the selected display device.
-        display = self.displayCombobox.getValue()
-
-        # Retrieve the selected display view.
-        view = self.viewCombobox.getValue()
-
-        # Enable or disable the OCIO processor.
-        self.ocio_processor.set_enabled(enable)
-
         # Notify the media player that the OCIO configuration has changed.
-        self.ocio_changed.emit(self.ocio_processor, color_space, display, view)
+        self.ocio_changed.emit(self.ocio_processor)
 
-        # Close the configuration dialog.
-        self.close()
+        print("\n")
+        LOGGER.info(f"State: {self.ocio_processor.enabled}")
+        LOGGER.info(f"Color Space: {self.ocio_processor.color_space}")
+        LOGGER.info(f"Display: {self.ocio_processor.display}")
+        LOGGER.info(f"View: {self.ocio_processor.view}")
 
 
 if __name__ == "__main__":

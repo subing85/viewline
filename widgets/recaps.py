@@ -80,39 +80,38 @@ Notes:
 
 from __future__ import absolute_import
 
-
-import utils
-import logger
-import constants
-import resources
-
 from PySide6 import QtCore
 from PySide6 import QtWidgets
 
-from widgets.styles import WaitCursor
+from viewline import utils
+from viewline import logger
+from viewline import constants
+from viewline import resources
 
-from widgets.labels import RightLabel
-from widgets.labels import ImageViewLabel
+from viewline.widgets.styles import WaitCursor
 
-from widgets.dialogs import FileDialog
+from viewline.widgets.labels import RightLabel
+from viewline.widgets.labels import ImageViewLabel
 
-from widgets.buttons import TextButton
-from widgets.buttons import RemoveButton
-from widgets.buttons import AttachButton
-from widgets.buttons import SnapshotButton
+from viewline.widgets.dialogs import FileDialog
 
-from widgets.messagebox import MessageBox
+from viewline.widgets.buttons import TextButton
+from viewline.widgets.buttons import RemoveButton
+from viewline.widgets.buttons import AttachButton
+from viewline.widgets.buttons import SnapshotButton
 
-from widgets.layouts import VerticalLayout
-from widgets.layouts import VerticalSplitter
-from widgets.layouts import HorizontalSpacer
-from widgets.layouts import HorizontalLayout
-from widgets.layouts import HorizontalLineFrame
+from viewline.widgets.messagebox import MessageBox
 
-from widgets.textedits import ReviewTextEdit
+from viewline.widgets.layouts import VerticalLayout
+from viewline.widgets.layouts import VerticalSplitter
+from viewline.widgets.layouts import HorizontalSpacer
+from viewline.widgets.layouts import HorizontalLayout
+from viewline.widgets.layouts import HorizontalLineFrame
 
-from widgets.comboboxs import ReviewTypeCombobox
-from widgets.comboboxs import StatusTypeCombobox
+from viewline.widgets.textedits import ReviewTextEdit
+
+from viewline.widgets.comboboxs import ReviewTypeCombobox
+from viewline.widgets.comboboxs import StatusTypeCombobox
 
 LOGGER = logger.getLogger(__name__)
 
@@ -290,7 +289,7 @@ class OutputWidget(QtWidgets.QScrollArea):
             valid, result = Review.get(self.context, reverse=True)
 
         if not valid:
-            LOGGER.warning("Couild not find valid task")
+            LOGGER.warning("Could not find valid task")
             return
 
         # Create Submission Widgets
@@ -373,7 +372,7 @@ class ReviewOutFrame(QtWidgets.QFrame):
         context = resources.getTool("viewspan")
         context["artisan"] = utils.getArtisanContext()
 
-        from widgets import viewspan
+        from viewline.widgets import viewspan
 
         self.viewspan_window = viewspan.MainWindow(parent=None, **context)
         self.viewspan_window.set_pixmap_preview(pixmap, self.thumbnail_titile)

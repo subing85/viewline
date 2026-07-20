@@ -55,13 +55,13 @@ Notes:
 
 from __future__ import absolute_import
 
-import constants
-
 from PySide6 import QtCore
 from PySide6 import QtWidgets
 
-from widgets.styles import Font
-from widgets.pixmaps import PathPixmap
+from viewline import constants
+
+from viewline.widgets.styles import Font
+from viewline.widgets.pixmaps import PathPixmap
 
 
 class CopyrightLabel(QtWidgets.QLabel):

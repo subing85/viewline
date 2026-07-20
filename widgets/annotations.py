@@ -108,13 +108,13 @@ from __future__ import absolute_import
 import copy
 import uuid
 
-import constants
-
 from PySide6 import QtGui
 from PySide6 import QtCore
 
-from widgets.styles import Font
-from widgets.styles import StrokePen
+from viewline import constants
+
+from viewline.widgets.styles import Font
+from viewline.widgets.styles import StrokePen
 
 
 class Sketch(object):
@@ -590,10 +590,14 @@ class Sketch(object):
         if self.current_frame is None:
             return
 
-        painter.setCompositionMode(QtGui.QPainter.CompositionMode_SourceOver)
-        painter.setRenderHint(QtGui.QPainter.Antialiasing)
-        painter.setRenderHint(QtGui.QPainter.SmoothPixmapTransform)
-        painter.setRenderHint(QtGui.QPainter.TextAntialiasing)
+        # painter.setCompositionMode(QtGui.QPainter.CompositionMode_SourceOver)
+        # painter.setRenderHint(QtGui.QPainter.Antialiasing)
+        # painter.setRenderHint(QtGui.QPainter.SmoothPixmapTransform)
+        # painter.setRenderHint(QtGui.QPainter.TextAntialiasing)
+
+        # painter.setRenderHint(QtGui.QPainter.Antialiasing, True)
+        # painter.setRenderHint(QtGui.QPainter.TextAntialiasing, True)
+        # painter.setRenderHint(QtGui.QPainter.SmoothPixmapTransform, True)
 
         # Retrieve strokes for current frame
         strokes = self.get_strokes()
@@ -736,24 +740,17 @@ class Sketch(object):
             None
         """
 
-        # Text anchor position
-        point = stroke["position"]
+        font_data = {
+            "size": stroke["font_size"],
+            "family": stroke["family"],
+            "bold": stroke["bold"],
+            "italic": stroke["italic"],
+            "underline": stroke["underline"],
+            "strikeOut": stroke["strike_out"],
+        }
 
-        if point_converter:
-            draw_point = point_converter(point)
-        else:
-            draw_point = point
-
-        # Font setup
-        font = QtGui.QFont()
-
-        font.setFamily(stroke.get("family", None))
-        font.setPointSize(stroke.get("font_size", 24))
-        font.setBold(stroke.get("bold", False))
-        font.setItalic(stroke.get("italic", False))
-        font.setUnderline(stroke.get("underline", False))
-        font.setStrikeOut(stroke.get("strike_out", False))
-
+        # Build font from configuration
+        font = Font(None, **font_data)
         painter.setFont(font)
 
         # Font Metrics
@@ -764,7 +761,8 @@ class Sketch(object):
         height = metrics.height()
         ascent = metrics.ascent()
 
-        # Store bounds for hit-testing (important for selection)
+        point = stroke["position"]
+
         stroke["bounds"] = {
             "x": point[0],
             "y": point[1],
@@ -773,9 +771,16 @@ class Sketch(object):
             "ascent": ascent,
         }
 
-        # Draw
-        painter.setPen(QtGui.QColor(*stroke["color"]))
-        painter.drawText(draw_point, text)
+        if point_converter:
+            draw_point = point_converter(point)
+        else:
+            draw_point = point
+
+        path = QtGui.QPainterPath()
+        path.addText(draw_point, font, text)
+
+        fill_color = QtGui.QColor(*stroke["color"])
+        painter.fillPath(path, fill_color)
 
     def erase(self, point):
         """
@@ -945,8 +950,7 @@ class Sketch(object):
             return
 
         # Blue dashed selection pen
-        pen = StrokePen(stroke["color"], thickness=2)
-        painter.setPen(pen)
+        pen = StrokePen((255, 255, 255), thickness=2, style=QtCore.Qt.DashLine)
         painter.setPen(pen)
         painter.drawRect(rect)
 
@@ -1508,25 +1512,25 @@ class Sketch(object):
         font = Font(None, **font_data)
         painter.setFont(font)
 
-        # Text colors
-        fill_color = QtGui.QColor(*font_data.get("fillColor", (255, 255, 255)))
-        stroke_color = QtGui.QColor(*font_data.get("strokeColor", (0, 0, 0)))
-
-        stroke_width = font_data.get("stroke", 2)
-
         # Build text path
         path = QtGui.QPainterPath()
         path.addText(x, y, font, text)
 
+        stroke_width = font_data.get("stroke", 2)
+
         # Draw text stroke
         if stroke_width > 0:
-            pen = StrokePen(stroke["color"], thickness=stroke_width)
+            stroke_color = font_data.get("strokeColor", (0, 0, 0))
+            pen = StrokePen(stroke_color, thickness=stroke_width)
             painter.setPen(pen)
             painter.strokePath(path, pen)
 
         # Set text opacity
         opacity = font_data.get("opacity", 1.0)
         painter.setOpacity(opacity)
+
+        # Text colors
+        fill_color = QtGui.QColor(*font_data.get("fillColor", (255, 255, 255)))
 
         # Draw text fill
         painter.fillPath(path, fill_color)

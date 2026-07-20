@@ -47,13 +47,13 @@ from __future__ import absolute_import
 
 import re
 
-import utils
-import constants
-
 from PySide6 import QtCore
 from PySide6 import QtWidgets
 
-from widgets.styles import SetStylesheet
+from viewline import utils
+from viewline import constants
+
+from viewline.widgets.styles import SetStylesheet
 
 
 class SequenceDisplayDelegate(QtWidgets.QStyledItemDelegate):
@@ -325,6 +325,8 @@ class ColorDialog(QtWidgets.QColorDialog):
         # Initialize QColorDialog
         super().__init__(parent)
 
+        self.normalized_color = None
+
         # Apply application theme
         SetStylesheet(self, theme=constants.DEFAULT_THEME)
 
@@ -345,6 +347,8 @@ class ColorDialog(QtWidgets.QColorDialog):
         # Validate color
         if not color_form.isValid():
             return
+
+        self.normalized_color = (color_form.redF(), color_form.greenF(), color_form.blueF())
 
         # Convert QColor to RGB tuple
         color = (color_form.red(), color_form.green(), color_form.blue())

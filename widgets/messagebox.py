@@ -52,7 +52,7 @@ from __future__ import absolute_import
 
 from PySide6 import QtWidgets
 
-from widgets.styles import SetStylesheet
+from viewline.widgets.styles import SetStylesheet
 
 
 class MessageBox(QtWidgets.QMessageBox):

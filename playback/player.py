@@ -57,18 +57,18 @@ from __future__ import absolute_import
 
 import numpy
 
-import utils
-import logger
-import constants
-
 from collections import deque
 
 from PySide6 import QtCore
 from PySide6 import QtMultimedia
 
-from playback.cache import FrameCache
-from playback.reader import MovieReader
-from playback.reader import SequenceReader
+from viewline import utils
+from viewline import logger
+from viewline import constants
+
+from viewline.playback.cache import FrameCache
+from viewline.playback.reader import MovieReader
+from viewline.playback.reader import SequenceReader
 
 LOGGER = logger.getLogger(__name__)
 
@@ -180,17 +180,26 @@ class MediaPlayer(BasePlayer):
     def reader(self):
         """Return active media reader."""
 
+        if not self.player:
+            return
+
         return self.player.reader
 
     @property
     def frame_count(self):
         """Return total timeline frames."""
 
+        if not self.player:
+            return
+
         return self.player.frame_count
 
     @property
     def is_playing(self):
         """Return playback state."""
+
+        if not self.player:
+            return
 
         return self.player.is_playing
 
@@ -202,22 +211,47 @@ class MediaPlayer(BasePlayer):
                 Volume percentage (0-100).
         """
 
+        if not self.player:
+            return
+
         self.player.volume_changed(value)
 
     def toggle_play_pause(self):
         """Toggle playback state."""
+
+        if not self.player:
+            return
 
         self.player.toggle_play_pause()
 
     def backward_frame(self):
         """Step backward one frame."""
 
+        if not self.player:
+            return
+
         self.player.backward_frame()
 
     def forward_frame(self):
         """Step forward one frame."""
 
+        if not self.player:
+            return
+
         self.player.forward_frame()
+
+    def set_fps(self, fps):
+        """Set the fps.
+
+        Args:
+            enabled (float):
+                Media FPS value.
+        """
+
+        if not self.player:
+            return
+
+        self.player.set_fps(fps)
 
     def set_loop(self, enabled):
         """Enable or disable looping.
@@ -227,7 +261,10 @@ class MediaPlayer(BasePlayer):
                 Loop playback state.
         """
 
-        self.player.set_loop()
+        if not self.player:
+            return
+
+        self.player.set_loop(enabled)
 
     def seek(self, frame):
         """Seek to timeline frame.
@@ -236,6 +273,9 @@ class MediaPlayer(BasePlayer):
             frame (int):
                 Target timeline frame.
         """
+
+        if not self.player:
+            return
 
         self.player.seek(frame)
 
@@ -246,6 +286,9 @@ class MediaPlayer(BasePlayer):
             aov (str):
                 AOV name.
         """
+
+        if not self.player:
+            return
 
         self.player.set_aov(aov)
 
@@ -266,13 +309,17 @@ class MediaPlayer(BasePlayer):
                 OCIO view.
         """
 
+        if not self.player:
+            return
+
         if self.player:
             self.player.set_ocio(processor, input_space, display, view)
-        else:
-            self.ocio_processor = processor
-            self.input_space = input_space
-            self.display = display
-            self.view = view
+
+        # else:
+        #     self.ocio_processor = processor
+        #    self.input_space = input_space
+        #    self.display = display
+        #    self.view = view
 
 
 class SequencePlayer(BasePlayer):
@@ -580,31 +627,6 @@ class SequencePlayer(BasePlayer):
         # Refresh Viewer Frame
         self.update_frame()
 
-    def backward_frame(self):
-        """Step playback backward by one frame.
-
-        Behavior:
-            - Moves one frame backward
-            - Wraps around at timeline start
-
-        Example:
-            >>> player.backward_frame()
-        """
-
-        # Validate Reader
-        if not self.reader:
-            return
-
-        # Step Backward
-        self.current_frame -= 1
-
-        # Wrap Timeline
-        if self.current_frame <= self.start_frame:
-            self.current_frame = constants.VL_START_FRAME + (self.frame_count - 1)
-
-        # Refresh Viewer Frame
-        self.update_frame()
-
     def forward_frame(self):
         """Step playback forward by one frame.
 
@@ -626,6 +648,31 @@ class SequencePlayer(BasePlayer):
         # Wrap Timeline
         if self.current_frame >= constants.VL_START_FRAME + self.frame_count:
             self.current_frame = self.start_frame
+
+        # Refresh Viewer Frame
+        self.update_frame()
+
+    def backward_frame(self):
+        """Step playback backward by one frame.
+
+        Behavior:
+            - Moves one frame backward
+            - Wraps around at timeline start
+
+        Example:
+            >>> player.backward_frame()
+        """
+
+        # Validate Reader
+        if not self.reader:
+            return
+
+        # Step Backward
+        self.current_frame -= 1
+
+        # Wrap Timeline
+        if self.current_frame <= self.start_frame:
+            self.current_frame = constants.VL_START_FRAME + (self.frame_count - 1)
 
         # Refresh Viewer Frame
         self.update_frame()
@@ -711,11 +758,7 @@ class SequencePlayer(BasePlayer):
         if self.cache.cache and self.current_frame in self.cache.cache:
             frame = self.cache.cache[self.current_frame]
         else:  # Read From Media Reader
-            frame = self.reader.get_frame(
-                self.current_frame,
-                aov=self.current_aov,
-                ocio_processor=self.ocio_processor,
-            )
+            frame = self.reader.get_frame(self.current_frame, aov=self.current_aov)
 
         # Store Frame Into Cache
         self.cache.add(self.current_frame, frame)
@@ -792,6 +835,9 @@ class MoviePlayer(BasePlayer):
 
         # Total timeline frames.
         self.frame_count = 0
+
+        self.is_start_frame = False
+        self.is_end_frame = False
 
         # Playback frame rate.
         self.fps = None
@@ -944,12 +990,17 @@ class MoviePlayer(BasePlayer):
         # Convert the timeline frame into playback time (seconds).
         seconds = (frame - self.start_frame) / self.reader.get_fps()
 
+        self.is_start_frame = True if frame == self.start_frame else False
+
         # Reposition the movie decoder.
         video_frame = self.reader.seek_time(seconds)
 
         # Stop if the requested position could not be decoded.
         if video_frame is None:
+            self.is_end_frame = True
             return
+
+        self.is_end_frame = False
 
         # Synchronize the playback clock with the decoded frame.
         self.playback_offset = video_frame.time
@@ -962,7 +1013,11 @@ class MoviePlayer(BasePlayer):
         self.audio_player.flush()
 
         # Display the requested frame immediately.
+
         self.display_video_frame(video_frame)
+
+        # numpy_frame = video_frame.to_ndarray(format="rgb24")
+        # self.display_video_frame(numpy_frame)
 
         # Decode upcoming packets ready for playback.
         self.fill_movie_queue()
@@ -1082,55 +1137,16 @@ class MoviePlayer(BasePlayer):
             self.display_video_frame(frame)
 
     def display_video_frame(self, frame):
-        """Display a decoded video frame.
+        """Emit decoded AVFrame."""
 
-        Converts a decoded PyAV video frame into an RGB image suitable for display, optionally applies an OpenColorIO display transform,
-        determines the corresponding timeline frame number, and emits playback signals for the viewer.
-
-        Playback flow:
-            1. Convert the decoded frame into an RGB image.
-            2. Apply the active OCIO display transform (optional).
-            3. Convert playback time into a timeline frame.
-            4. Emit the image for display.
-            5. Notify the timeline of the current frame.
-
-        Args:
-            frame (av.VideoFrame):
-                Decoded video frame.
-
-        Emits:
-            frame_ready (numpy.ndarray):
-                Image buffer ready for display.
-
-            frame_changed (int):
-                Current timeline frame number.
-
-        Notes:
-            Timeline frame numbers are calculated from the movie presentation timestamp (PTS) rather than decoder order,
-            ensuring accurate synchronization with playback time.
-        """
-
-        # Convert the decoded video frame into an RGB NumPy image.
-        image = frame.to_ndarray(format="rgb24")
-
-        # Apply the active OCIO display transform when enabled.
-        if self.ocio_processor:
-            # Convert the image into floating-point values expected by OCIO.
-            image = image.astype(numpy.float32) / 255.0
-
-            # Apply the configured display transform.
-            image = self.ocio_processor.process_image(image)
-
-            # Convert the processed image back to 8-bit RGB.
-            image = (numpy.clip(image, 0.0, 1.0) * 255.0).astype(numpy.uint8)
-
-        # Convert playback time into the corresponding timeline frame.
         frame_number = self.start_frame + round(frame.time * self.reader.get_fps())
 
-        # Send the image to the viewer.
-        self.frame_ready.emit(image)
+        # Send AVFrame directly.
+        # self.frame_ready.emit(frame)
 
-        # Send the image to the viewer.
+        numpy_frame = frame.to_ndarray(format="rgb24")
+        self.frame_ready.emit(numpy_frame)
+
         self.frame_changed.emit(frame_number)
 
     def play_audio(self, current_time):
@@ -1350,6 +1366,9 @@ class MoviePlayer(BasePlayer):
         # Convert playback time into a timeline frame.
         frame = self.start_frame + round(current * self.reader.get_fps())
 
+        if self.is_end_frame:
+            frame = self.start_frame
+
         # Display the requested frame.
         self.seek(frame)
 
@@ -1388,8 +1407,18 @@ class MoviePlayer(BasePlayer):
         # Convert playback time into a timeline frame.
         frame = self.start_frame + round(current * self.reader.get_fps())
 
-        # Display the requested frame.
-        self.seek(frame)
+        # Go to end frame
+        if self.is_start_frame:
+            index = 1
+            while True:
+                frame = self.start_frame + (self.frame_count - index)
+                self.seek(frame)
+                if not self.is_end_frame:
+                    break
+                index += 1
+        else:
+            # Display the requested frame.
+            self.seek(frame)
 
     def set_loop(self, enabled):
         """Enable or disable loop playback.
@@ -1410,6 +1439,9 @@ class MoviePlayer(BasePlayer):
 
         # Store the loop playback state.
         self.loop_enabled = enabled
+
+    def set_fps(self, fps):
+        pass
 
     def volume_changed(self, value):
         """Update playback volume.

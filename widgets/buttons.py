@@ -50,9 +50,9 @@ from PySide6 import QtGui
 from PySide6 import QtCore
 from PySide6 import QtWidgets
 
-from widgets.menus import WatermarkMenus
-from widgets.dialogs import ColorDialog
-from widgets.pixmaps import NamePixmapIcon
+from viewline.widgets.menus import WatermarkMenus
+from viewline.widgets.dialogs import ColorDialog
+from viewline.widgets.pixmaps import NamePixmapIcon
 
 
 class IconButton(QtWidgets.QPushButton):
@@ -288,6 +288,18 @@ class OcioButton(IconButton):
     name = "ocio"
 
 
+class FilterButton(IconButton):
+    """Filter button."""
+
+    name = "filter"
+
+
+class ResetButton(IconButton):
+    """Filter button."""
+
+    name = "reset"
+
+
 class HelpButton(IconButton):
     """Help/documentation button."""
 
@@ -368,11 +380,14 @@ class ColorButton(QtWidgets.QPushButton):
         # Initialize QPushButton
         super(ColorButton, self).__init__(parent)
 
+        self.label = kwargs.get("label")
+
         # Button dimensions
         self.width = kwargs.get("width", 22)
         self.height = kwargs.get("height", 22)
 
         # Default color (red)
+        self.normalized_color = (1.0, 0.0, 0.0)
         self.color = kwargs.get("color", (255, 0, 0))
 
         # Fixed size lock
@@ -390,6 +405,9 @@ class ColorButton(QtWidgets.QPushButton):
             self.setMinimumSize(QtCore.QSize(self.width, self.height))
             self.setMaximumSize(QtCore.QSize(self.width, self.height))
 
+        if self.label:
+            self.setText(kwargs["label"])
+
         # Apply initial button style
         self.updateStyle()
 
@@ -405,11 +423,18 @@ class ColorButton(QtWidgets.QPushButton):
         Update button appearance using current color.
         """
 
-        self.setStyleSheet(f"""
+        if self.label:
+            styleSheet = f"""
+            border: 1px solid #ffffff;
+            background-color: rgb{self.color};
+            """
+        else:
+            styleSheet = f"""
             border-radius: {self.width / 2}px;
             border: 1px solid #ffffff;
             background-color: rgb{self.color};
-            """)
+            """
+        self.setStyleSheet(styleSheet)
 
     def setColor(self, color):
         """
@@ -455,6 +480,7 @@ class ColorButton(QtWidgets.QPushButton):
                 return
 
             self.color = result
+            self.normalized_color = color_dialog.normalized_color
 
             # Apply selected color
             self.setColor(result)

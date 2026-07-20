@@ -6,7 +6,7 @@
             "enable": true,
             "checked": false,
             "font": {
-                "size": 15,
+                "size": 10,
                 "family": "Noto Sans",
                 "fillColor": [
                     255,
@@ -37,7 +37,7 @@
             "enable": true,
             "checked": false,
             "font": {
-                "size": 15,
+                "size": 10,
                 "family": "Noto Sans",
                 "fillColor": [
                     255,
@@ -67,7 +67,7 @@
             "enable": true,
             "checked": false,
             "font": {
-                "size": 15,
+                "size": 10,
                 "family": "Noto Sans",
                 "fillColor": [
                     255,
@@ -97,7 +97,7 @@
             "enable": true,
             "checked": false,
             "font": {
-                "size": 15,
+                "size": 10,
                 "family": "Noto Sans",
                 "fillColor": [
                     255,
@@ -129,7 +129,7 @@
             "enable": true,
             "checked": false,
             "font": {
-                "size": 15,
+                "size": 10,
                 "family": "Noto Sans",
                 "fillColor": [
                     255,
@@ -159,7 +159,7 @@
             "enable": true,
             "checked": false,
             "font": {
-                "size": 15,
+                "size": 10,
                 "family": "Noto Sans",
                 "fillColor": [
                     255,
@@ -239,7 +239,7 @@
             "enable": true,
             "checked": false,
             "font": {
-                "size": 15,
+                "size": 10,
                 "family": "Noto Sans",
                 "fillColor": [
                     255,

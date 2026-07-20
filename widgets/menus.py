@@ -33,8 +33,8 @@ Features:
 
 from __future__ import absolute_import
 
-import utils
-import resources
+from viewline import utils
+from viewline import resources
 
 from PySide6 import QtGui
 from PySide6 import QtCore

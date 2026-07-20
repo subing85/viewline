@@ -165,7 +165,7 @@ class MovieReader(object):
 
         self.open()
 
-    def next_packet_old(self):
+    def next_packet(self):
         """
         Decode the next available packet.
 
@@ -189,33 +189,6 @@ class MovieReader(object):
             elif self.audio_stream and packet.stream == self.audio_stream:
                 for frame in packet.decode():
                     return ("audio", frame)
-
-    def next_packet(self):
-        """
-        Return the next decoded media frame.
-
-        Returns:
-            tuple[str, av.Frame] | None:
-                ("video", frame), ("audio", frame), or None when EOF.
-        """
-
-        while True:
-            # Return already-decoded frames first.
-            if self.pending_frames:
-                return self.pending_frames.pop(0)
-
-            try:
-                packet = next(self.packet_generator)
-            except StopIteration:
-                return None
-
-            if packet.stream == self.video_stream:
-                for frame in packet.decode():
-                    self.pending_frames.append(("video", frame))
-
-            elif self.audio_stream and packet.stream == self.audio_stream:
-                for frame in packet.decode():
-                    self.pending_frames.append(("audio", frame))
 
     def seek_time(self, seconds):
         """
@@ -283,7 +256,7 @@ class MovieReader(object):
 
         return self.frame_table[frame_index]["pts"]
 
-    def get_fps(self, rounded=0):
+    def get_fps(self, rounded=2):
         """
         Return the movie frame rate.
 
@@ -301,6 +274,7 @@ class MovieReader(object):
         if rounded == 0:
             return fps
         result = round(fps, rounded)
+
         return result
 
     def frame_count(self):
@@ -323,7 +297,8 @@ class MovieReader(object):
                 Duration in seconds.
         """
 
-        return float(self.container.duration / 1000000)
+        # return float(self.container.duration / 1000000)
+        return float(self.video_stream.duration * self.video_stream.time_base)
 
     def sample_rate(self):
         """
@@ -512,7 +487,7 @@ class SequenceReader(object):
 
         return len(self.files)
 
-    def get_fps(self, rounded=0):
+    def get_fps(self, rounded=2):
         """Return playback FPS.
 
         Returns:
@@ -545,7 +520,7 @@ class SequenceReader(object):
 
         self.fps = fps or self.fps
 
-    def get_frame(self, current_frame, aov="rgb", ocio_processor=None):
+    def get_frame(self, current_frame, aov="rgb"):
         """Read image frame from sequence.
 
         Args:
@@ -624,8 +599,8 @@ class SequenceReader(object):
             image = numpy.repeat(image, 3, axis=2)
 
         # Add OCIO
-        if ocio_processor and ocio_processor.enabled:
-            image = ocio_processor.process_image(image)
+        # if ocio_processor and ocio_processor.enabled:
+        #     image = ocio_processor.process_image(image)
 
         # Convert Float Image To Preview Image
         image = numpy.clip(image, 0.0, 1.0)

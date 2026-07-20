@@ -24,40 +24,43 @@ The MainWindow class acts as the central controller between the playback engine,
 
 from __future__ import absolute_import
 
-import utils
-import logger
-import resources
-import constants
 
 from PySide6 import QtGui
 from PySide6 import QtCore
 from PySide6 import QtWidgets
 
-from ocio import OCIOProcessor
+from viewline import utils
+from viewline import logger
+from viewline import resources
+from viewline import constants
 
-from widgets.ocio import OcioWidget
+from viewline.ocio import OCIOProcessor
 
-from widgets.viewer import ViewFrame
+from viewline.playback.player import MediaPlayer
 
-from widgets.pixmaps import PathPixmap
-from widgets.pixmaps import NamePixmapIcon
+from viewline.widgets.ocio import OcioWidget
 
-from widgets.buttons import HelpButton
-from widgets.buttons import ThemeButton
+from viewline.widgets.filter import ColorFilterWidget
 
-from widgets.dialogs import FileDialog
-from widgets.dialogs import OpenMediaDialog
+from viewline.widgets.viewer import ViewFrame
 
-from playback.player import MediaPlayer
+from viewline.widgets.pixmaps import PathPixmap
+from viewline.widgets.pixmaps import NamePixmapIcon
 
-from widgets.recaps import RecapsWidget
-from widgets.styles import SetStylesheet
-from widgets.labels import CopyrightLabel
-from widgets.playlist import PlaylistWidget
+from viewline.widgets.buttons import HelpButton
+from viewline.widgets.buttons import ThemeButton
 
-from widgets.layouts import VerticalLayout
-from widgets.layouts import HorizontalLayout
-from widgets.layouts import HorizontalSplitter
+from viewline.widgets.dialogs import FileDialog
+from viewline.widgets.dialogs import OpenMediaDialog
+
+from viewline.widgets.recaps import RecapsWidget
+from viewline.widgets.styles import SetStylesheet
+from viewline.widgets.labels import CopyrightLabel
+from viewline.widgets.playlist import PlaylistWidget
+
+from viewline.widgets.layouts import VerticalLayout
+from viewline.widgets.layouts import HorizontalLayout
+from viewline.widgets.layouts import HorizontalSplitter
 
 LOGGER = logger.getLogger(__name__)
 
@@ -97,6 +100,8 @@ class MainWindow(QtWidgets.QMainWindow):
         # OCIO color processor
         self.ocio = OCIOProcessor()
 
+        # Display Settings
+
         # Playback controller
         self.player = MediaPlayer()
 
@@ -109,6 +114,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.current_theme = constants.DEFAULT_THEME
 
         self.ocio_widget = OcioWidget(None)
+
+        self.filter_widget = ColorFilterWidget(None)
 
         # Build UI
         self.setupUi()
@@ -189,20 +196,29 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.viewframe.viewToolbarLayout.open_trigger.connect(self.open_media)
         self.viewframe.viewToolbarLayout.ocio_trigger.connect(self.call_ocio)
-        self.ocio_widget.ocio_changed.connect(self.player.set_ocio)
+        # self.ocio_widget.ocio_changed.connect(self.player.set_ocio)
+        self.ocio_widget.ocio_changed.connect(self.viewframe.viewer.set_ocio)
+
+        self.viewframe.viewToolbarLayout.filter_trigger.connect(self.call_filter)
+
+        self.filter_widget.displayWidget.display_changed.connect(
+            self.viewframe.viewer.display_changed
+        )
+        self.filter_widget.stylesWidget.style_changed.connect(self.viewframe.viewer.style_changed)
+        self.filter_widget.filterWidget.filter_changed.connect(self.viewframe.viewer.filter_changed)
 
         ########################################################################
 
         self.viewframe.viewToolbarLayout.aov_changed.connect(self.player.set_aov)
 
         self.viewframe.viewToolbarLayout.thicknes_changed.connect(
-            self.viewframe.viewer.annotations.set_thickness
+            self.viewframe.viewer.sketch.set_thickness
         )
         self.viewframe.viewToolbarLayout.radius_changed.connect(
-            self.viewframe.viewer.annotations.set_eraser_radius
+            self.viewframe.viewer.sketch.set_eraser_radius
         )
         self.viewframe.viewToolbarLayout.color_changed.connect(
-            self.viewframe.viewer.annotations.set_color
+            self.viewframe.viewer.sketch.set_color
         )
 
         self.viewframe.viewToolbarLayout.draw_enabled.connect(self.set_draw_enabled)
@@ -247,7 +263,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Next frame
         self.forwardShortcut = QtGui.QShortcut(QtGui.QKeySequence(QtCore.Qt.Key.Key_Right), self)
-        self.forwardShortcut.activated.connect(self.backward_frame)
+        self.forwardShortcut.activated.connect(self.forward_frame)
 
         # Open media
         self.openShortcut = QtGui.QShortcut(QtGui.QKeySequence("Ctrl+O"), self)
@@ -276,6 +292,10 @@ class MainWindow(QtWidgets.QMainWindow):
         Setup the main window icon.
         """
 
+        # icon = QtGui.QIcon()
+        # icon.addFile("D:/works/developments/viewline/resources/icons/mc-viewline.png")
+        # self.setWindowIcon(icon)
+
         pixmap = NamePixmapIcon(constants.VL_TOOL_ICON)
         self.setWindowIcon(pixmap)
 
@@ -303,7 +323,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Build watermark resources
         logs = {
-            "project_logo": self.current_project["image"],
+            "project_logo": PathPixmap(self.current_project["image"]),
             "studio_logo": PathPixmap(resources.getIconFilepath(constants.STUDIO_NAME)),
         }
 
@@ -352,6 +372,8 @@ class MainWindow(QtWidgets.QMainWindow):
         # Load media into player
         self.player.load(filepath)
 
+        self.reset_video_fps()
+
         # Sequence media supports AOVs
         self.viewframe.viewToolbarLayout.set_aovs(
             self.player.reader.media_type, self.player.reader.get_available_aovs()
@@ -368,8 +390,25 @@ class MainWindow(QtWidgets.QMainWindow):
         self.openMedia()
 
     def call_ocio(self, *args):
+        # import importlib
+        # from viewline.widgets import ocio
+        # importlib.reload(ocio)
+        # from viewline.widgets.ocio import OcioWidget
+        # self.ocio_widget = OcioWidget(None)
+
         SetStylesheet(self.ocio_widget, theme=self.current_theme)
         self.ocio_widget.show()
+
+    def call_filter(self, *args):
+
+        # import importlib
+        # from viewline.widgets import filter
+        # importlib.reload(filter)
+        # from viewline.widgets.filter import ColorFilterWidget
+        # self.filter_widget = ColorFilterWidget(None)
+
+        SetStylesheet(self.filter_widget, theme=self.current_theme)
+        self.filter_widget.show()
 
     def reset_video_fps(self):
         """
@@ -379,7 +418,7 @@ class MainWindow(QtWidgets.QMainWindow):
             return
 
         # Only applies to video playback
-        if self.player.reader.media_type != "video":
+        if self.player.reader.media_type != "movie":
             return
 
         self.viewframe.timelineToolbarLayout.reset_fps(

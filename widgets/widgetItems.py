@@ -45,9 +45,9 @@ from __future__ import absolute_import
 from PySide6 import QtCore
 from PySide6 import QtWidgets
 
-from widgets.pixmaps import PathPixmap
-from widgets.pixmaps import NamePixmap
-from widgets.pixmaps import PixmapIcon
+from viewline.widgets.pixmaps import PathPixmap
+from viewline.widgets.pixmaps import NamePixmap
+from viewline.widgets.pixmaps import PixmapIcon
 
 
 class PlaylistWidgetItem(QtWidgets.QTreeWidgetItem):

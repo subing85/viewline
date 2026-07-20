@@ -46,13 +46,13 @@ Notes:
 
 from __future__ import absolute_import
 
-import constants
-
 from PySide6 import QtCore
 from PySide6 import QtWidgets
 
-from widgets.styles import Font
-from widgets.styles import WaitCursor
+from viewline import constants
+
+from viewline.widgets.styles import Font
+from viewline.widgets.styles import WaitCursor
 
 
 class ContextCombobox(QtWidgets.QComboBox):
